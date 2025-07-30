@@ -13,6 +13,7 @@ from typing import List, Dict, Any, Optional
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.api_utils import APIClient, DataProcessor
+from utils.geocoding import EnhancedAddressParser
 from db.db_connection import get_db_manager
 from config.settings import settings
 
@@ -26,6 +27,7 @@ class CCTVController:
         self.api_client = APIClient()
         self.db_manager = get_db_manager()
         self.data_processor = DataProcessor()
+        self.address_parser = EnhancedAddressParser()
         
         # API 서비스명 (서울 열린데이터 CCTV 서비스)
         self.service_name = "safeOpenCCTV"
@@ -86,9 +88,30 @@ class CCTVController:
                 else:  # 문자열 필드
                     processed_data[db_field] = str(value).strip() if value else None
             
-            # 주소 정리
+            # 주소 파싱 + 좌표 기반 지오코딩으로 동명 및 자치구 추출
             if processed_data.get('address'):
-                processed_data['address'] = self.data_processor.clean_address(processed_data['address'])
+                parsed_address = self.address_parser.parse_with_coordinates(
+                    processed_data['address'],
+                    processed_data.get('latitude'),
+                    processed_data.get('longitude')
+                )
+                
+                # 파싱된 정보로 업데이트
+                if parsed_address['parsing_success']:
+                    if parsed_address['district'] and not processed_data.get('district'):
+                        processed_data['district'] = parsed_address['district']
+                    
+                    if parsed_address['dong']:
+                        processed_data['dong'] = parsed_address['dong']
+                    
+                    # 정리된 주소 사용
+                    processed_data['address'] = parsed_address['cleaned_address']
+                    
+                    # 디버그 로그
+                    logger.debug(f"Address parsing method: {parsed_address.get('method', 'unknown')}")
+                else:
+                    # 파싱 실패시 기본 주소 정리만 수행
+                    processed_data['address'] = self.data_processor.clean_address(processed_data['address'])
             
             # 필수 데이터 검증
             if not processed_data.get('address'):
