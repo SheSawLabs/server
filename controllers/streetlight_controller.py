@@ -78,26 +78,9 @@ class StreetlightController:
                 else:  # 문자열 필드
                     processed_data[db_field] = str(value).strip() if value else None
             
-            # 좌표 기반 지오코딩으로 자치구 및 동명 추출
-            district = None
-            dong = None
-            
-            lat, lon = processed_data.get('latitude'), processed_data.get('longitude')
-            if lat and lon:
-                parsed_address = self.address_parser.parse_with_coordinates(
-                    '',  # 주소 정보가 없으므로 빈 문자열
-                    lat, lon
-                )
-                
-                if parsed_address['parsing_success']:
-                    district = parsed_address['district']
-                    dong = parsed_address['dong']
-                    
-                    # 디버그 로그
-                    logger.debug(f"Geocoding method: {parsed_address.get('method', 'unknown')}")
-            
-            processed_data['district'] = district
-            processed_data['dong'] = dong
+            # 일단 동 정보는 없음으로 설정 (나중에 배치로 처리)
+            processed_data['district'] = None
+            processed_data['dong'] = None
             
             # 필수 데이터 검증 (좌표가 있어야 함)
             if not processed_data.get('latitude') or not processed_data.get('longitude'):
@@ -105,6 +88,7 @@ class StreetlightController:
                 return None
             
             # 좌표 유효성 검사
+            lat, lon = processed_data.get('latitude'), processed_data.get('longitude')
             if lat and lon:
                 # 대한민국 좌표 범위 확인 (대략적)
                 if not (33.0 <= lat <= 43.0 and 124.0 <= lon <= 132.0):
@@ -126,11 +110,10 @@ class StreetlightController:
             return []
         
         try:
-            # 모든 페이지 데이터 가져오기
             raw_data = self.odcloud_client.fetch_all_pages(
                 service_id=self.service_id,
                 api_key=self.api_key,
-                max_pages=50,  # 안전장치 (필요시 조정)
+                max_pages=25,
                 per_page=1000
             )
             
@@ -194,6 +177,55 @@ class StreetlightController:
         except Exception as e:
             logger.error(f"Error saving to database: {e}")
             raise
+    
+    def update_missing_locations(self) -> int:
+        """동 정보가 없는 레코드만 지오코딩하여 업데이트"""
+        try:
+            # 동 정보가 없는 레코드 조회
+            query = """
+                SELECT id, latitude, longitude 
+                FROM streetlight_installations 
+                WHERE district IS NULL OR dong IS NULL
+            """
+            records = self.db_manager.execute_query(query)
+            
+            if not records:
+                logger.info("No records need location update")
+                return 0
+            
+            logger.info(f"Updating location for {len(records)} records")
+            updated_count = 0
+            
+            for record in records:
+                lat, lon = record['latitude'], record['longitude']
+                if not lat or not lon:
+                    continue
+                
+                # 지오코딩 수행
+                parsed_address = self.address_parser.parse_with_coordinates('', lat, lon)
+                
+                if parsed_address['parsing_success']:
+                    district = parsed_address['district']
+                    dong = parsed_address['dong']
+                    
+                    # DB 업데이트
+                    update_query = """
+                        UPDATE streetlight_installations 
+                        SET district = %s, dong = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """
+                    self.db_manager.execute_non_query(update_query, (district, dong, record['id']))
+                    updated_count += 1
+                    
+                    if updated_count % 100 == 0:
+                        logger.info(f"Updated {updated_count}/{len(records)} records")
+            
+            logger.info(f"Location update completed: {updated_count} records updated")
+            return updated_count
+            
+        except Exception as e:
+            logger.error(f"Error updating locations: {e}")
+            return 0
     
     def run_update(self) -> Dict[str, Any]:
         """가로등 데이터 업데이트 실행"""
