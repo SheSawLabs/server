@@ -60,3 +60,18 @@ Thumbs.db
 *.tmp
 *.temp
 *~
+
+# 로그 파일
+*.log
+
+# 테스트 및 디버그 파일
+test_*.py
+debug_*.py
+check_*.py
+run_*.py
+
+# 데이터 파일
+*.csv
+
+# 임시 스크립트
+temp_*.py
