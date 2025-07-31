@@ -183,11 +183,9 @@ docker exec shesaw_dev python3 scheduler/streetlight_scheduler.py
 
 ## 🚀 향후 계획
 
-- [ ] 실시간 데이터 수집 시스템
-- [ ] Web Dashboard 개발
+- [ ] 안전도 수치화
 - [ ] 데이터 분석 및 시각화
 - [ ] API 서버 구축
-- [ ] 모바일 앱 연동
 
 ## 🤝 기여하기
 
