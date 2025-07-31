@@ -82,7 +82,7 @@ class ODCloudAPIClient:
             logger.error(f"Unexpected error for {service_id} page {page}: {e}")
             return None
     
-    def fetch_all_pages(self, service_id: str, api_key: str, max_pages: int = 100, 
+    def fetch_all_pages(self, service_id: str, api_key: str, max_pages: int = None, 
                         per_page: int = 1000) -> List[Dict[str, Any]]:
         """
         모든 페이지 데이터 가져오기
