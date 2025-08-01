@@ -75,13 +75,13 @@ class CPTEDCalculator:
         'activity_support': 0.10         # 활동성
     }
     
-    # 안전도 등급 기준
+    # 안전도 등급 기준 (실제 데이터 분포에 맞게 조정)
     GRADE_THRESHOLDS = {
-        'A': 80.0,   # 매우 안전
-        'B': 65.0,   # 안전
-        'C': 50.0,   # 보통
-        'D': 35.0,   # 위험
-        'E': 0.0     # 매우 위험
+        'A': 60.0,   # 매우 안전 (상위 20%)
+        'B': 50.0,   # 안전 (상위 40%)
+        'C': 40.0,   # 보통 (상위 60%)
+        'D': 30.0,   # 위험 (상위 80%)
+        'E': 0.0     # 매우 위험 (하위 20%)
     }
     
     def __init__(self):
@@ -98,16 +98,19 @@ class CPTEDCalculator:
         Returns:
             0-100 점수
         """
-        # CCTV 밀도 점수 (개/km²)
+        # CCTV 밀도 점수 (개/km²) - 기준을 낮춰서 더 현실적으로
         cctv_density = factors.cctv_count / area_size
-        cctv_score = min(100, cctv_density * 2)  # CCTV 50개/km²를 100점으로 설정
+        cctv_score = min(100, cctv_density * 10)  # CCTV 10개/km²를 100점으로 설정
         
-        # 가로등 밀도 점수 (개/km²)
+        # 가로등 밀도 점수 (개/km²) - 기준을 낮춰서 더 현실적으로
         streetlight_density = factors.streetlight_count / area_size
-        streetlight_score = min(100, streetlight_density * 0.1)  # 가로등 1000개/km²를 100점으로 설정
+        streetlight_score = min(100, streetlight_density * 1)  # 가로등 100개/km²를 100점으로 설정
         
-        # 가중 평균 (CCTV 70%, 가로등 30%)
-        return cctv_score * 0.7 + streetlight_score * 0.3
+        # 기본 점수 추가 (시설이 없어도 최소 20점)
+        base_score = 20
+        
+        # 가중 평균 (CCTV 50%, 가로등 30%, 기본점수 20%)
+        return cctv_score * 0.5 + streetlight_score * 0.3 + base_score * 0.2
     
     def calculate_access_control_score(self, factors: SafetyFactors, area_size: float = 1.0) -> float:
         """
@@ -142,16 +145,19 @@ class CPTEDCalculator:
         Returns:
             0-100 점수
         """
-        # 경찰서 밀도 점수
+        # 경찰서 밀도 점수 - 기준을 더 현실적으로
         police_density = factors.police_station_count / area_size
-        police_score = min(100, police_density * 20)  # 경찰서 5개/km²를 100점으로 설정
+        police_score = min(100, police_density * 100)  # 경찰서 1개/km²를 100점으로 설정
         
-        # 여성안심지킴이집 밀도 점수
+        # 여성안심지킴이집 밀도 점수 - 기준을 더 현실적으로  
         safety_house_density = factors.female_safety_house_count / area_size
-        safety_house_score = min(100, safety_house_density * 5)  # 20개/km²를 100점으로 설정
+        safety_house_score = min(100, safety_house_density * 20)  # 5개/km²를 100점으로 설정
         
-        # 가중 평균 (경찰서 70%, 여성안심지킴이집 30%)
-        return police_score * 0.7 + safety_house_score * 0.3
+        # 기본 점수 추가 (시설이 없어도 최소 30점)
+        base_score = 30
+        
+        # 가중 평균 (경찰서 40%, 여성안심지킴이집 30%, 기본점수 30%)
+        return police_score * 0.4 + safety_house_score * 0.3 + base_score * 0.3
     
     def calculate_maintenance_score(self, factors: SafetyFactors) -> float:
         """
@@ -163,9 +169,12 @@ class CPTEDCalculator:
         Returns:
             0-100 점수
         """
-        # 현재는 기본값 사용
-        # TODO: 실제 유지관리 데이터 (어두운 골목, 쓰레기 방치 등) 연동
-        return factors.maintenance_score * 100
+        # 기본 점수에 변동성 추가 (동별로 다른 유지관리 상태 반영)
+        base_score = factors.maintenance_score * 100
+        # CCTV와 가로등 개수에 따른 보너스 (잘 관리되는 지역일 가능성)
+        facility_bonus = min(20, (factors.cctv_count + factors.streetlight_count) * 0.1)
+        
+        return min(100, base_score + facility_bonus)
     
     def calculate_activity_support_score(self, factors: SafetyFactors, area_size: float = 1.0) -> float:
         """
@@ -182,10 +191,12 @@ class CPTEDCalculator:
         delivery_density = factors.delivery_box_count / area_size
         delivery_score = min(100, delivery_density * 10)  # 10개/km²를 100점으로 설정
         
-        # 기본 활동성 점수와 가중 평균
-        activity_base_score = factors.activity_score * 100
+        # 기본 활동성 점수에 변동성 추가 (면적에 따른 보정)
+        # 면적이 작을수록 활동성이 높다고 가정 (밀집도 높음)
+        area_bonus = max(0, 20 - area_size * 5)  # 면적이 작을수록 보너스
+        activity_base_score = factors.activity_score * 100 + area_bonus
         
-        return delivery_score * 0.3 + activity_base_score * 0.7
+        return min(100, delivery_score * 0.3 + activity_base_score * 0.7)
     
     def calculate_safety_score(self, factors: SafetyFactors, area_size: float = 1.0) -> SafetyScore:
         """
@@ -214,11 +225,26 @@ class CPTEDCalculator:
             activity_support * self.WEIGHTS['activity_support']
         )
         
+        # 지역 특성에 따른 보정 (시설 총합에 따른 추가 점수)
+        total_facilities = (factors.cctv_count + factors.streetlight_count + 
+                          factors.police_station_count + factors.female_safety_house_count + 
+                          factors.delivery_box_count)
+        
+        # 시설 밀도 보너스 (최대 15점)
+        facility_density_bonus = min(15, total_facilities / area_size * 2)
+        
+        # 성범죄자 페널티 (최대 -10점)
+        offender_penalty = min(10, factors.sexual_offender_count * 2)
+        
+        # 최종 점수 계산
+        final_score = total_score + facility_density_bonus - offender_penalty
+        final_score = max(0, min(100, final_score))  # 0-100 범위로 제한
+        
         # 등급 결정
-        grade = self.get_safety_grade(total_score)
+        grade = self.get_safety_grade(final_score)
         
         return SafetyScore(
-            total_score=round(total_score, 2),
+            total_score=round(final_score, 2),
             natural_surveillance=round(natural_surveillance, 2),
             access_control=round(access_control, 2),
             territoriality=round(territoriality, 2),
@@ -228,12 +254,37 @@ class CPTEDCalculator:
             timestamp=datetime.now()
         )
     
-    def get_safety_grade(self, score: float) -> str:
-        """안전도 점수를 등급으로 변환"""
-        for grade, threshold in self.GRADE_THRESHOLDS.items():
-            if score >= threshold:
-                return grade
-        return 'E'
+    def get_safety_grade(self, score: float, use_statistical_grading: bool = False, mean: float = None, std: float = None) -> str:
+        """
+        안전도 점수를 등급으로 변환
+        
+        Args:
+            score: 안전도 점수
+            use_statistical_grading: 통계적 등급 방식 사용 여부
+            mean: 평균 점수 (통계적 등급 방식 사용시)
+            std: 표준편차 (통계적 등급 방식 사용시)
+        """
+        if use_statistical_grading and mean is not None and std is not None:
+            # Z-score 기반 등급 결정
+            z_score = (score - mean) / std if std > 0 else 0
+            
+            # 정규분포 기반 등급 (상위 20%, 40%, 60%, 80%, 나머지)
+            if z_score >= 0.84:    # 상위 20%
+                return 'A'
+            elif z_score >= 0.25:  # 상위 40%
+                return 'B'
+            elif z_score >= -0.25: # 상위 60%
+                return 'C'
+            elif z_score >= -0.84: # 상위 80%
+                return 'D'
+            else:                  # 하위 20%
+                return 'E'
+        else:
+            # 기존 고정 기준 방식
+            for grade, threshold in self.GRADE_THRESHOLDS.items():
+                if score >= threshold:
+                    return grade
+            return 'E'
     
     def get_safety_factors_by_dong(self, district: str, dong: str) -> SafetyFactors:
         """

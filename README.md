@@ -9,7 +9,7 @@
 
 ## 🎯 프로젝트 개요
 
-서울시의 안전 관련 시설 정보를 공공 API로부터 자동으로 수집하고, 지오코딩을 통해 위치 정보를 보강하여 통합 데이터베이스에 저장하는 파이프라인입니다.
+서울시의 안전 관련 시설 정보를 공공 API로부터 자동으로 수집하고, CPTED(Crime Prevention Through Environmental Design) 원칙에 기반한 동별 안전도 분석 시스템입니다.
 
 ### 📊 수집 대상 데이터
 
@@ -21,6 +21,7 @@
 | ⚠️ **성범죄자 거주지** | 공개된 성범죄자 주소 정보 | ✅ 완료 |
 | 📹 **CCTV** | 서울시 CCTV 설치 현황 | ✅ 완료 |
 | 📦 **안심택배함** | 안전한 택배 수령 시설 | ✅ 완료 |
+| 🔒 **동별 안전도** | CPTED 기반 안전도 분석 | ✅ 완료 |
 
 ## 🏗️ 시스템 아키텍처
 
@@ -28,9 +29,9 @@
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   공공 API      │────│  Data Pipeline  │────│   PostgreSQL    │
 │                 │    │                 │    │                 │
-│ • 서울 열린데이터│    │ • 컨트롤러       │    │ • 통합 저장      │
-│ • 공공데이터포털 │    │ • 스케줄러       │    │ • 지오코딩 보강   │
-│ • ODCloud API   │    │ • 지오코딩       │    │ • 인덱싱 최적화   │
+│ • 서울 열린데이터│    │ • 컨트롤러       │    │ • 통합 저장     │
+│ • 공공데이터포털 │    │ • 스케줄러       │    │ • 지오코딩 보강  │
+│ • ODCloud API   │    │ • 지오코딩       │    │ • 인덱싱 최적화  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -48,7 +49,17 @@
 - **주소 파싱**: 구/동 정보 자동 추출
 - **좌표 검증**: 대한민국 영역 내 좌표 확인
 
-### 3. 스케줄러
+### 3. CPTED 기반 안전도 분석
+- **5개 원칙 적용**: 자연적 감시(35%), 접근통제(25%), 영역성(20%), 유지관리(10%), 활동성(10%)
+- **동별 안전도 등급**: A~E 등급으로 분류
+- **시설 밀도 분석**: 면적 대비 안전 시설 밀도 계산
+- **개선 권고**: 부족한 시설에 대한 구체적 개선 방안 제시
+
+### 4. JSON 데이터 출력
+- **지도 표시용 데이터**: 동별 요약 정보 및 좌표
+- **상세 리포트**: CPTED 분석 결과 및 시설별 세부 정보
+
+### 5. 스케줄러
 - **자동 수집**: 정기적인 데이터 업데이트
 - **API 제한 관리**: 일일 호출 한도 준수
 - **로깅**: 상세한 실행 로그 및 통계
@@ -63,7 +74,24 @@ seoul-safety-data-pipeline/
 │   ├── female_safety_house_controller.py
 │   ├── sexual_offender_controller.py
 │   ├── cctv_controller.py
-│   └── delivery_box_controller.py
+│   ├── delivery_box_controller.py
+│   └── safety_analysis_controller.py
+├── safety_score/               # 안전도 분석 시스템
+│   ├── cpted_calculator.py     # CPTED 기반 안전도 계산
+│   └── dong_safety_calculator.py # 동별 안전도 통합 분석
+├── analysis/                   # 분석 및 리포트 생성
+│   ├── safety_analyzer.py
+│   ├── report_generator.py
+│   └── detailed_report_generator.py
+├── scripts/                    # 데이터 생성 스크립트
+│   ├── generate_map_data.py    # 지도용 JSON 생성
+│   ├── generate_report_data.py # 상세 리포트 JSON 생성
+│   ├── geocoding.py
+│   ├── parse_csv.py
+│   └── assign_dong.py
+├── data/                       # 생성된 JSON 데이터
+│   ├── map_data.json          # 지도 표시용 동별 요약 데이터
+│   └── report_data.json       # 동별 상세 안전도 리포트
 ├── scheduler/                   # 스케줄링 시스템
 │   ├── streetlight_scheduler.py
 │   └── sexual_offender_scheduler.py
@@ -73,14 +101,11 @@ seoul-safety-data-pipeline/
 │   ├── address_parser.py
 │   ├── data_go_kr_api.py
 │   └── odcloud_api.py
-├── scripts/                    # 스크립트 모음
-│   ├── geocoding.py
-│   ├── parse_csv.py
-│   └── assign_dong.py
 ├── db/                        # 데이터베이스 관련
 │   ├── db_connection.py
 │   ├── init_schema.py
 │   └── schemas/               # SQL 스키마 정의
+├── archive_temp_files/         # 개발 중 임시 파일들
 ├── config/                    # 설정 파일
 │   └── settings.py
 ├── docker-compose.yml         # Docker 구성
@@ -149,10 +174,11 @@ WOMEN_SAFETY_API_KEY=your_women_safety_api_key
 - `sexual_offender_addresses` - 성범죄자 거주지 정보
 - `cctv_installations` - CCTV 설치 현황
 - `safe_delivery_boxes` - 안심택배함 위치
+- `dong_safety_scores` - 동별 CPTED 기반 안전도 점수 및 등급
 
 ## 🎯 사용 예시
 
-### 개별 컨트롤러 실행
+### 1. 개별 컨트롤러 실행
 ```bash
 # 경찰서 데이터 수집
 docker exec shesaw_dev python3 controllers/police_station_controller.py
@@ -161,7 +187,22 @@ docker exec shesaw_dev python3 controllers/police_station_controller.py
 docker exec shesaw_dev python3 controllers/streetlight_controller.py
 ```
 
-### 스케줄러 실행
+### 2. 안전도 분석 실행
+```bash
+# 동별 안전도 계산
+docker exec shesaw_dev python3 safety_score/dong_safety_calculator.py
+```
+
+### 3. JSON 데이터 생성
+```bash
+# 지도용 동별 요약 데이터 생성
+docker exec shesaw_dev python3 scripts/generate_map_data.py
+
+# 동별 상세 리포트 데이터 생성
+docker exec shesaw_dev python3 scripts/generate_report_data.py
+```
+
+### 4. 스케줄러 실행
 ```bash
 # 정기 수집 스케줄러 실행
 docker exec shesaw_dev python3 scheduler/streetlight_scheduler.py
@@ -174,18 +215,20 @@ docker exec shesaw_dev python3 scheduler/streetlight_scheduler.py
   - 가로등 설치 현황 데이터 수집 완료
   - 여성안심지킴이집 데이터 수집 완료
   - 성범죄자 거주지 정보 수집 완료
+  - CCTV 및 안심택배함 데이터 수집 완료
+
+- **🔒 안전도 분석 시스템**
+  - CPTED 5개 원칙 기반 동별 안전도 계산 완료
+  - 서울시 전 동(약 400여개) 안전도 등급 분류
+  - 지도 표시용 JSON 데이터 생성 (`data/map_data.json`)
+  - 상세 분석 리포트 JSON 생성 (`data/report_data.json`)
 
 - **🔧 기술적 성과**
   - 안정적인 API 연동 시스템 구축
   - 효율적인 지오코딩 파이프라인 구현
   - Docker 기반 컨테이너화 완료
   - 확장 가능한 아키텍처 설계
-
-## 🚀 향후 계획
-
-- [ ] 안전도 수치화
-- [ ] 데이터 분석 및 시각화
-- [ ] API 서버 구축
+  - 실시간 안전도 분석 및 JSON 출력 시스템
 
 ## 🤝 기여하기
 

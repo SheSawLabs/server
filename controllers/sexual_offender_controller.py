@@ -71,7 +71,7 @@ class SexualOffenderController:
             logger.error(f"Error getting total count: {e}")
             return 0
     
-    def fetch_data_page(self, page: int = 1, per_page: int = 1000) -> Dict[str, Any]:
+    def fetch_data_page(self, page: int = 1, per_page: int = 1000, seoul_only: bool = True) -> Dict[str, Any]:
         """페이지별 데이터 조회"""
         try:
             params = {
@@ -79,6 +79,10 @@ class SexualOffenderController:
                 'numOfRows': str(per_page),
                 'type': 'json'
             }
+            
+            # 서울시만 필터링
+            if seoul_only:
+                params['ctpvNm'] = '서울특별시'
             
             logger.debug(f"Fetching page {page} with {per_page} records per page")
             
@@ -408,7 +412,7 @@ class SexualOffenderController:
                 logger.info(f"Processing page {page}/{total_pages}")
                 
                 # 페이지 데이터 조회
-                result = self.fetch_data_page(page, per_page)
+                result = self.fetch_data_page(page, per_page, seoul_only=False)
                 total_api_calls += 1
                 
                 if not result['success']:
@@ -462,6 +466,75 @@ class SexualOffenderController:
             
         except Exception as e:
             logger.error(f"Error in full collection: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'records_saved': 0,
+                'api_calls_used': 0
+            }
+    
+    def run_full_collection_seoul_only(self) -> Dict[str, Any]:
+        """서울시 데이터만 수집 실행"""
+        logger.info("Starting Seoul-only sexual offender address data collection")
+        
+        try:
+            # 서울시 데이터 수집
+            per_page = 1000
+            total_saved = 0
+            total_api_calls = 0
+            page = 1
+            
+            while True:
+                logger.info(f"Processing Seoul data page {page}")
+                
+                # 서울시 데이터만 페이지별 조회
+                result = self.fetch_data_page(page, per_page, seoul_only=True)
+                total_api_calls += 1
+                
+                if not result['success']:
+                    logger.error(f"Failed to fetch Seoul page {page}: {result.get('error')}")
+                    break
+                
+                if not result['data']:
+                    logger.info(f"No more Seoul data at page {page}, stopping")
+                    break
+                
+                # 데이터 처리
+                processed_data = self.process_raw_data(result['data'])
+                
+                # 좌표 정보 추가 준비 (나중에 처리)
+                geocoded_data = self.geocode_addresses(processed_data)
+                
+                # 데이터베이스 저장
+                save_result = self.save_to_database(geocoded_data)
+                if save_result['success']:
+                    total_saved += save_result['saved_count']
+                    logger.info(f"Seoul page {page} completed: {save_result['saved_count']} records saved")
+                else:
+                    logger.error(f"Failed to save Seoul page {page}: {save_result.get('error')}")
+                
+                # 다음 페이지로
+                page += 1
+                
+                # API 제한 고려한 지연
+                time.sleep(0.5)
+                
+                # 일일 제한 확인
+                if total_api_calls >= self.daily_limit:
+                    logger.warning(f"Daily API limit reached: {total_api_calls}")
+                    break
+            
+            logger.info(f"Seoul sexual offender address collection completed: {total_saved} records saved, {total_api_calls} API calls used")
+            
+            return {
+                'success': True,
+                'records_saved': total_saved,
+                'api_calls_used': total_api_calls,
+                'pages_processed': page - 1
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in Seoul-only collection: {e}")
             return {
                 'success': False,
                 'error': str(e),
