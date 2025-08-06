@@ -1,51 +1,94 @@
-# Environment variables (contains sensitive information)
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment variables
 .env
 .env.local
-.env.production
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# Virtual environments
-venv/
-env/
-ENV/
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Data and cache directories
-data/
-logs/
-cache/
-
-# Docker volumes
-postgres_data/
 
 # OS
 .DS_Store
@@ -56,22 +99,11 @@ postgres_data/
 ehthumbs.db
 Thumbs.db
 
+# Logs
+logs
+*.log
+
 # Temporary files
 *.tmp
 *.temp
 *~
-
-# 로그 파일
-*.log
-
-# 테스트 및 디버그 파일
-test_*.py
-debug_*.py
-check_*.py
-run_*.py
-
-# 데이터 파일
-*.csv
-
-# 임시 스크립트
-temp_*.py
