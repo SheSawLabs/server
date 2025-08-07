@@ -1,10 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/database';
 
+export type MeetupCategory = '수리' | '소분' | '취미' | '기타';
+
 export interface Meetup {
   id: string;
   title: string;
   content: string;
+  category: MeetupCategory;
   image_url?: string;
   location: string;
   date: Date;
@@ -15,6 +18,7 @@ export interface Meetup {
 export interface CreateMeetupData {
   title: string;
   content: string;
+  category: MeetupCategory;
   image_url?: string;
   location: string;
   date: Date;
@@ -26,8 +30,8 @@ export class MeetupModel {
     const now = new Date();
     
     const query = `
-      INSERT INTO meetups (id, title, content, image_url, location, date, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO meetups (id, title, content, category, image_url, location, date, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
     
@@ -35,6 +39,7 @@ export class MeetupModel {
       id,
       data.title,
       data.content,
+      data.category,
       data.image_url,
       data.location,
       data.date,
