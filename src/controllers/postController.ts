@@ -6,7 +6,7 @@ const VALID_CATEGORIES: PostCategory[] = ['수리', '소분', '취미', '기타'
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, content, category, location, date } = req.body;
+    const { title, content, category, location, date, min_participants, max_participants } = req.body;
     
     // Basic validation
     if (!title || !content || !category) {
@@ -26,14 +26,25 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // Meetup validation (모임 카테고리는 location과 date 필수)
-    if (category !== '일반' && (!location || !date)) {
+    // Meetup validation (모임 카테고리는 location, date, 인원 수 필수)
+    if (category !== '일반' && (!location || !date || !min_participants || !max_participants)) {
       res.status(400).json({
-        error: 'Meetup posts require location and date',
-        required: ['location', 'date'],
-        message: `Category '${category}' requires location and date fields`
+        error: 'Meetup posts require location, date, and participant limits',
+        required: ['location', 'date', 'min_participants', 'max_participants'],
+        message: `Category '${category}' requires location, date, and participant limit fields`
       });
       return;
+    }
+
+    // Participant limits validation for meetups
+    if (category !== '일반') {
+      if (min_participants <= 0 || max_participants <= 0 || min_participants > max_participants) {
+        res.status(400).json({
+          error: 'Invalid participant limits',
+          message: 'min_participants and max_participants must be positive, and min_participants <= max_participants'
+        });
+        return;
+      }
     }
 
     // Handle image URL if file was uploaded
@@ -45,7 +56,9 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
       category,
       image_url: imageUrl,
       location: category !== '일반' ? location : undefined,
-      date: category !== '일반' && date ? new Date(date) : undefined
+      date: category !== '일반' && date ? new Date(date) : undefined,
+      min_participants: category !== '일반' ? min_participants : undefined,
+      max_participants: category !== '일반' ? max_participants : undefined
     };
 
     const newPost = await PostModel.create(postData);
@@ -196,21 +209,38 @@ export const joinMeetup = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    // Check if meetup is full
+    const meetupWithParticipants = await PostModel.findMeetupWithParticipants(id);
+    if (meetupWithParticipants && meetupWithParticipants.max_participants && 
+        meetupWithParticipants.current_participants >= meetupWithParticipants.max_participants) {
+      res.status(400).json({
+        error: 'Meetup is full',
+        current_participants: meetupWithParticipants.current_participants,
+        max_participants: meetupWithParticipants.max_participants
+      });
+      return;
+    }
+
     // Join the meetup
     const participant = await ParticipantModel.join({
       post_id: id,
       participant_name: participant_name.trim()
     });
 
-    // Get updated participant count
-    const participantCount = await ParticipantModel.getParticipantCount(id);
+    // Update meetup status based on new participant count
+    await PostModel.updateMeetupStatus(id);
+
+    // Get updated participant count and meetup status
+    const updatedMeetup = await PostModel.findMeetupWithParticipants(id);
 
     res.status(201).json({
       success: true,
       message: 'Successfully joined the meetup',
       data: {
         participant,
-        total_participants: participantCount
+        meetup_status: updatedMeetup?.status,
+        current_participants: updatedMeetup?.current_participants,
+        max_participants: updatedMeetup?.max_participants
       }
     });
   } catch (error) {
@@ -252,6 +282,16 @@ export const leaveMeetup = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    // Check if meetup is active or full - prohibit leaving
+    if (post.status === 'active' || post.status === 'full') {
+      res.status(400).json({
+        error: 'Cannot leave active or full meetups',
+        status: post.status,
+        message: 'Participants cannot leave meetups that are already active or full'
+      });
+      return;
+    }
+
     // Leave the meetup
     const left = await ParticipantModel.leave(id, participant_name.trim());
     
@@ -263,15 +303,20 @@ export const leaveMeetup = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Get updated participant count
-    const participantCount = await ParticipantModel.getParticipantCount(id);
+    // Update meetup status based on new participant count
+    await PostModel.updateMeetupStatus(id);
+
+    // Get updated participant count and meetup status
+    const updatedMeetup = await PostModel.findMeetupWithParticipants(id);
 
     res.json({
       success: true,
       message: 'Successfully left the meetup',
       data: {
         participant_name: participant_name.trim(),
-        total_participants: participantCount
+        meetup_status: updatedMeetup?.status,
+        current_participants: updatedMeetup?.current_participants,
+        max_participants: updatedMeetup?.max_participants
       }
     });
   } catch (error) {

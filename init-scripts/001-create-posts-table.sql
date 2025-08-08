@@ -12,6 +12,11 @@ CREATE TABLE IF NOT EXISTS posts (
     location VARCHAR(255),
     date TIMESTAMP WITH TIME ZONE,
     
+    -- Meetup participant limits and status
+    min_participants INTEGER,
+    max_participants INTEGER,
+    status VARCHAR(20) DEFAULT 'recruiting' CHECK (status IN ('recruiting', 'active', 'full')),
+    
     -- Common fields
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -20,7 +25,14 @@ CREATE TABLE IF NOT EXISTS posts (
     CONSTRAINT meetup_required_fields 
         CHECK (
             (category = '일반') OR 
-            (category != '일반' AND location IS NOT NULL AND date IS NOT NULL)
+            (category != '일반' AND location IS NOT NULL AND date IS NOT NULL AND min_participants IS NOT NULL AND max_participants IS NOT NULL)
+        ),
+    
+    -- Participant limits validation
+    CONSTRAINT participant_limits_check
+        CHECK (
+            (category = '일반') OR
+            (min_participants > 0 AND max_participants > 0 AND min_participants <= max_participants)
         )
 );
 
@@ -29,3 +41,4 @@ CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category);
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at);
 CREATE INDEX IF NOT EXISTS idx_posts_date ON posts(date) WHERE category != '일반';
 CREATE INDEX IF NOT EXISTS idx_posts_location ON posts(location) WHERE category != '일반';
+CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status) WHERE category != '일반';
