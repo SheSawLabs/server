@@ -1,15 +1,16 @@
 import express from 'express';
-import { createPost, getPosts, getPostById } from '../controllers/postController';
+import { createPost, getPosts, getPostById, getMeetups, getGeneralPosts } from '../controllers/postController';
+import { uploadImage } from '../middleware/upload';
 
 const router = express.Router();
 
-// POST /api/posts - Create a new post
-router.post('/', createPost);
+// Main unified endpoints
+router.post('/', uploadImage.single('image'), createPost);         // POST /api/posts
+router.get('/', getPosts);                                        // GET /api/posts?category=수리
+router.get('/:id', getPostById);                                  // GET /api/posts/:id
 
-// GET /api/posts - Get all posts
-router.get('/', getPosts);
-
-// GET /api/posts/:id - Get a specific post
-router.get('/:id', getPostById);
+// Helper endpoints for convenience  
+router.get('/meetups/all', getMeetups);                          // GET /api/posts/meetups/all
+router.get('/general/all', getGeneralPosts);                     // GET /api/posts/general/all
 
 export default router;
