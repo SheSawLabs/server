@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
-import meetupRoutes from './routes/meetupRoutes';
 import postRoutes from './routes/postRoutes';
 
 dotenv.config();
@@ -39,7 +38,6 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API Routes
-app.use('/api/meetups', meetupRoutes);
 app.use('/api/posts', postRoutes);
 
 // 404 handler
