@@ -9,6 +9,7 @@ export interface Post {
   title: string;
   content: string;
   category: PostCategory;
+  author_name: string;
   image_url?: string;
   location?: string;
   date?: Date;
@@ -23,6 +24,7 @@ export interface CreatePostData {
   title: string;
   content: string;
   category: PostCategory;
+  author_name: string;
   image_url?: string;
   location?: string;
   date?: Date;
@@ -37,8 +39,8 @@ export class PostModel {
     const now = new Date();
     
     const query = `
-      INSERT INTO posts (id, title, content, category, image_url, location, date, min_participants, max_participants, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO posts (id, title, content, category, author_name, image_url, location, date, min_participants, max_participants, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `;
     
@@ -47,6 +49,7 @@ export class PostModel {
       data.title,
       data.content,
       data.category,
+      data.author_name,
       data.image_url,
       data.location,
       data.date,
