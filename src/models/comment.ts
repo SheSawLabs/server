@@ -4,6 +4,7 @@ import pool from '../config/database';
 export interface Comment {
   id: string;
   post_id: string;
+  parent_comment_id?: string;
   author_name: string;
   content: string;
   created_at: Date;
@@ -12,6 +13,7 @@ export interface Comment {
 
 export interface CreateCommentData {
   post_id: string;
+  parent_comment_id?: string;
   author_name: string;
   content: string;
 }
@@ -23,12 +25,12 @@ export class CommentModel {
     const now = new Date();
     
     const query = `
-      INSERT INTO comments (id, post_id, author_name, content, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO comments (id, post_id, parent_comment_id, author_name, content, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
     
-    const values = [id, data.post_id, data.author_name, data.content, now, now];
+    const values = [id, data.post_id, data.parent_comment_id, data.author_name, data.content, now, now];
     
     const result = await pool.query(query, values);
     return result.rows[0];

@@ -3,12 +3,13 @@ import { CommentModel } from '../models/comment';
 import { PostModel } from '../models/post';
 import { ParticipantModel } from '../models/participant';
 import { LikeModel } from '../models/like';
+import { CommentLikeModel } from '../models/commentLike';
 
 // Create comment
 export const createComment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params; // post_id
-    const { author_name, content } = req.body;
+    const { author_name, content, parent_comment_id } = req.body;
     
     // Validation
     if (!author_name || !content || author_name.trim().length === 0 || content.trim().length === 0) {
@@ -28,13 +29,34 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // For meetups (non-general posts), check if user is a participant
+    // For meetups (non-general posts), check if user is the author or a participant
     if (post.category !== '일반') {
+      const isAuthor = post.author_name === author_name.trim();
       const isParticipant = await ParticipantModel.isParticipant(id, author_name.trim());
-      if (!isParticipant) {
+      
+      if (!isAuthor && !isParticipant) {
         res.status(403).json({
-          error: 'Only meetup participants can comment',
-          message: 'You must join this meetup to comment'
+          error: 'Only meetup author or participants can comment',
+          message: 'You must be the meetup author or join this meetup to comment'
+        });
+        return;
+      }
+    }
+
+    // If replying to a comment, validate parent comment exists
+    if (parent_comment_id) {
+      const parentComment = await CommentModel.findById(parent_comment_id);
+      if (!parentComment) {
+        res.status(404).json({
+          error: 'Parent comment not found'
+        });
+        return;
+      }
+
+      // Ensure parent comment belongs to this post
+      if (parentComment.post_id !== id) {
+        res.status(400).json({
+          error: 'Parent comment does not belong to this post'
         });
         return;
       }
@@ -43,6 +65,7 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
     // Create comment
     const comment = await CommentModel.create({
       post_id: id,
+      parent_comment_id: parent_comment_id || undefined,
       author_name: author_name.trim(),
       content: content.trim()
     });
@@ -76,7 +99,7 @@ export const getComments = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // For meetups (non-general posts), check if user is a participant
+    // For meetups (non-general posts), check if user is the author or a participant
     if (post.category !== '일반') {
       if (!user_name || typeof user_name !== 'string') {
         res.status(400).json({
@@ -86,11 +109,13 @@ export const getComments = async (req: Request, res: Response): Promise<void> =>
         return;
       }
 
+      const isAuthor = post.author_name === user_name.trim();
       const isParticipant = await ParticipantModel.isParticipant(id, user_name.trim());
-      if (!isParticipant) {
+      
+      if (!isAuthor && !isParticipant) {
         res.status(403).json({
-          error: 'Only meetup participants can view comments',
-          message: 'You must join this meetup to view comments'
+          error: 'Only meetup author or participants can view comments',
+          message: 'You must be the meetup author or join this meetup to view comments'
         });
         return;
       }
@@ -267,6 +292,126 @@ export const getLikes = async (req: Request, res: Response): Promise<void> => {
     console.error('Error fetching likes:', error);
     res.status(500).json({
       error: 'Failed to fetch likes',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+// Toggle like on comment
+export const toggleCommentLike = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, commentId } = req.params; // post_id, comment_id
+    const { user_name } = req.body;
+    
+    // Validation
+    if (!user_name || user_name.trim().length === 0) {
+      res.status(400).json({
+        error: 'Missing required field: user_name'
+      });
+      return;
+    }
+
+    // Check if post exists
+    const post = await PostModel.findById(id);
+    if (!post) {
+      res.status(404).json({
+        error: 'Post not found'
+      });
+      return;
+    }
+
+    // Check if comment exists and belongs to this post
+    const comment = await CommentModel.findById(commentId);
+    if (!comment) {
+      res.status(404).json({
+        error: 'Comment not found'
+      });
+      return;
+    }
+
+    if (comment.post_id !== id) {
+      res.status(400).json({
+        error: 'Comment does not belong to this post'
+      });
+      return;
+    }
+
+    // Toggle comment like
+    const result = await CommentLikeModel.toggle({
+      comment_id: commentId,
+      user_name: user_name.trim()
+    });
+
+    res.json({
+      success: true,
+      message: result.liked ? 'Comment liked' : 'Comment unliked',
+      data: {
+        comment_id: commentId,
+        liked: result.liked,
+        like_count: result.likeCount
+      }
+    });
+  } catch (error) {
+    console.error('Error toggling comment like:', error);
+    res.status(500).json({
+      error: 'Failed to toggle comment like',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
+// Get like count for comment
+export const getCommentLikes = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, commentId } = req.params; // post_id, comment_id
+    const { user_name } = req.query;
+    
+    // Check if post exists
+    const post = await PostModel.findById(id);
+    if (!post) {
+      res.status(404).json({
+        error: 'Post not found'
+      });
+      return;
+    }
+
+    // Check if comment exists and belongs to this post
+    const comment = await CommentModel.findById(commentId);
+    if (!comment) {
+      res.status(404).json({
+        error: 'Comment not found'
+      });
+      return;
+    }
+
+    if (comment.post_id !== id) {
+      res.status(400).json({
+        error: 'Comment does not belong to this post'
+      });
+      return;
+    }
+
+    // Get like count
+    const likeCount = await CommentLikeModel.getCountByCommentId(commentId);
+    
+    // Check if current user liked (if user_name provided)
+    let isLiked = false;
+    if (user_name && typeof user_name === 'string') {
+      isLiked = await CommentLikeModel.isLikedByUser(commentId, user_name.trim());
+    }
+
+    res.json({
+      success: true,
+      data: {
+        comment_id: commentId,
+        like_count: likeCount,
+        is_liked: isLiked
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching comment likes:', error);
+    res.status(500).json({
+      error: 'Failed to fetch comment likes',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
