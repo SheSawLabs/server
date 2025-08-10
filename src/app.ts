@@ -5,11 +5,12 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
 import postRoutes from './routes/postRoutes';
+import authRoutes from './routes/auth';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet());
@@ -39,6 +40,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/posts', postRoutes);
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
