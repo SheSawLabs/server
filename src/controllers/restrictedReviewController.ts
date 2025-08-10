@@ -158,10 +158,11 @@ export class RestrictedReviewController {
           availableKeywords: this.keywordMatcher.getAvailableKeywords()
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in analyzeReviewRestricted:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '제한적 분석 중 오류가 발생했습니다.'
       });
@@ -258,10 +259,11 @@ export class RestrictedReviewController {
           availableKeywords
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in analyzeByKeywordsOnly:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '키워드 분석 중 오류가 발생했습니다.'
       });
@@ -298,10 +300,11 @@ export class RestrictedReviewController {
           categories: Object.keys(availableKeywords).length
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in getSystemInfo:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '시스템 정보 조회 중 오류가 발생했습니다.'
       });
@@ -366,10 +369,11 @@ export class RestrictedReviewController {
           availableKeywords: this.keywordMatcher.getAvailableKeywords()
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in getKeywordRecommendationsOnly:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '키워드 추천 중 오류가 발생했습니다.'
       });

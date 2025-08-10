@@ -42,10 +42,11 @@ export class ReviewController {
           availableKeywords: GPTPromptService.getAvailableKeywords()
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in getKeywordRecommendations:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '키워드 추천 중 오류가 발생했습니다.'
       });
@@ -88,10 +89,11 @@ export class ReviewController {
           scoreResult
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in calculateScore:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '점수 계산 중 오류가 발생했습니다.'
       });
@@ -173,10 +175,11 @@ export class ReviewController {
           availableKeywords
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in analyzeWithKeywordsAndRating:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '분석 중 오류가 발생했습니다.'
       });
@@ -253,6 +256,7 @@ export class ReviewController {
             availableKeywords: GPTPromptService.getAvailableKeywords()
           }
         });
+        return;
       } catch (dbError) {
         // DB 저장 실패해도 분석 결과는 반환
         console.error('DB 저장 실패:', dbError);
@@ -270,11 +274,12 @@ export class ReviewController {
             warning: 'DB 저장에 실패했지만 분석은 완료되었습니다.'
           }
         });
+        return;
       }
 
     } catch (error) {
       console.error('Error in analyzeReviewComplete:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '리뷰 분석 중 오류가 발생했습니다.'
       });
@@ -296,10 +301,11 @@ export class ReviewController {
           keywordMapping
         }
       });
+      return;
 
     } catch (error) {
       console.error('Error in getAvailableKeywords:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '키워드 정보 조회 중 오류가 발생했습니다.'
       });
@@ -352,10 +358,11 @@ export class ReviewController {
         success: true,
         data: result
       });
+      return;
 
     } catch (error) {
       console.error('Error in getReviews:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '리뷰 목록 조회 중 오류가 발생했습니다.'
       });
@@ -387,10 +394,11 @@ export class ReviewController {
         success: true,
         data: review
       });
+      return;
 
     } catch (error) {
       console.error('Error in getReview:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '리뷰 조회 중 오류가 발생했습니다.'
       });
@@ -424,10 +432,11 @@ export class ReviewController {
         data: updatedReview,
         message: '리뷰가 성공적으로 수정되었습니다.'
       });
+      return;
 
     } catch (error) {
       console.error('Error in updateReview:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '리뷰 수정 중 오류가 발생했습니다.'
       });
@@ -459,10 +468,11 @@ export class ReviewController {
         success: true,
         message: '리뷰가 성공적으로 삭제되었습니다.'
       });
+      return;
 
     } catch (error) {
       console.error('Error in deleteReview:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '리뷰 삭제 중 오류가 발생했습니다.'
       });
@@ -478,10 +488,11 @@ export class ReviewController {
         success: true,
         data: stats
       });
+      return;
 
     } catch (error) {
       console.error('Error in getReviewStats:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: '통계 정보 조회 중 오류가 발생했습니다.'
       });

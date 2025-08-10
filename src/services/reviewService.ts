@@ -120,8 +120,8 @@ export class ReviewService {
       const reviews = result.rows.slice(0, limit).map(row => this.mapDbRowToReview(row));
       
       // 다음 커서는 마지막 아이템의 created_at
-      const nextCursor = hasMore && reviews.length > 0 
-        ? reviews[reviews.length - 1].createdAt.toISOString()
+      const nextCursor = hasMore && reviews.length > 0 && reviews[reviews.length - 1].createdAt
+        ? reviews[reviews.length - 1].createdAt!.toISOString()
         : null;
       
       return {
