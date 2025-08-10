@@ -1,0 +1,1067 @@
+{
+  "metadata": {
+    "title": "서울시 동별 안전도 지도 데이터",
+    "description": "동별 안전도 등급, 점수, 좌표 및 주요 시설 개수 정보",
+    "generated_at": "2025-08-01T15:33:49.786192",
+    "total_dong": 50,
+    "grade_distribution": {
+      "D": 19,
+      "E": 7,
+      "C": 7,
+      "B": 5,
+      "A": 12
+    }
+  },
+  "data": [
+    {
+      "dong_code": "80171",
+      "district": "강동구",
+      "dong": "감일동",
+      "grade": "D",
+      "score": 72.16,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 9,
+        "streetlight": 217,
+        "police_station": 1,
+        "safety_house": 16,
+        "delivery_box": 4
+      },
+      "risk_factors": {
+        "sexual_offender": 5
+      }
+    },
+    {
+      "dong_code": "20731",
+      "district": "강동구",
+      "dong": "강일동",
+      "grade": "D",
+      "score": 68.11,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 64,
+        "streetlight": 12,
+        "police_station": 2,
+        "safety_house": 3,
+        "delivery_box": 18
+      },
+      "risk_factors": {
+        "sexual_offender": 5
+      }
+    },
+    {
+      "dong_code": "94046",
+      "district": "강동구",
+      "dong": "고덕1동",
+      "grade": "E",
+      "score": 51.16,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 2,
+        "streetlight": 155,
+        "police_station": 5,
+        "safety_house": 23,
+        "delivery_box": 9
+      },
+      "risk_factors": {
+        "sexual_offender": 14
+      }
+    },
+    {
+      "dong_code": "34741",
+      "district": "강동구",
+      "dong": "고덕2동",
+      "grade": "C",
+      "score": 76.12,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 26,
+        "streetlight": 262,
+        "police_station": 0,
+        "safety_house": 5,
+        "delivery_box": 18
+      },
+      "risk_factors": {
+        "sexual_offender": 8
+      }
+    },
+    {
+      "dong_code": "71272",
+      "district": "강동구",
+      "dong": "길동",
+      "grade": "B",
+      "score": 85.0,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 89,
+        "streetlight": 53,
+        "police_station": 4,
+        "safety_house": 0,
+        "delivery_box": 8
+      },
+      "risk_factors": {
+        "sexual_offender": 0
+      }
+    },
+    {
+      "dong_code": "23848",
+      "district": "강동구",
+      "dong": "둔촌1동",
+      "grade": "C",
+      "score": 73.96,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 83,
+        "streetlight": 109,
+        "police_station": 2,
+        "safety_house": 24,
+        "delivery_box": 15
+      },
+      "risk_factors": {
+        "sexual_offender": 7
+      }
+    },
+    {
+      "dong_code": "26686",
+      "district": "강동구",
+      "dong": "둔촌2동",
+      "grade": "D",
+      "score": 70.04,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 21,
+        "streetlight": 264,
+        "police_station": 1,
+        "safety_house": 19,
+        "delivery_box": 3
+      },
+      "risk_factors": {
+        "sexual_offender": 12
+      }
+    },
+    {
+      "dong_code": "80194",
+      "district": "강동구",
+      "dong": "둔촌동",
+      "grade": "E",
+      "score": 54.74,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 12,
+        "streetlight": 225,
+        "police_station": 4,
+        "safety_house": 3,
+        "delivery_box": 21
+      },
+      "risk_factors": {
+        "sexual_offender": 13
+      }
+    },
+    {
+      "dong_code": "87339",
+      "district": "강동구",
+      "dong": "명동",
+      "grade": "A",
+      "score": 88.48,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 35,
+        "streetlight": 15,
+        "police_station": 3,
+        "safety_house": 12,
+        "delivery_box": 3
+      },
+      "risk_factors": {
+        "sexual_offender": 3
+      }
+    },
+    {
+      "dong_code": "14699",
+      "district": "강동구",
+      "dong": "명일1동",
+      "grade": "E",
+      "score": 61.84,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 22,
+        "streetlight": 68,
+        "police_station": 1,
+        "safety_house": 8,
+        "delivery_box": 27
+      },
+      "risk_factors": {
+        "sexual_offender": 9
+      }
+    },
+    {
+      "dong_code": "30057",
+      "district": "강동구",
+      "dong": "명일2동",
+      "grade": "D",
+      "score": 68.66,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 61,
+        "streetlight": 35,
+        "police_station": 2,
+        "safety_house": 6,
+        "delivery_box": 23
+      },
+      "risk_factors": {
+        "sexual_offender": 7
+      }
+    },
+    {
+      "dong_code": "69779",
+      "district": "강동구",
+      "dong": "상일1동",
+      "grade": "A",
+      "score": 92.06,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 65,
+        "streetlight": 289,
+        "police_station": 0,
+        "safety_house": 23,
+        "delivery_box": 23
+      },
+      "risk_factors": {
+        "sexual_offender": 0
+      }
+    },
+    {
+      "dong_code": "23181",
+      "district": "강동구",
+      "dong": "상일2동",
+      "grade": "D",
+      "score": 70.31,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 19,
+        "streetlight": 185,
+        "police_station": 5,
+        "safety_house": 0,
+        "delivery_box": 7
+      },
+      "risk_factors": {
+        "sexual_offender": 5
+      }
+    },
+    {
+      "dong_code": "77615",
+      "district": "강동구",
+      "dong": "상일동",
+      "grade": "D",
+      "score": 65.15,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 88,
+        "streetlight": 196,
+        "police_station": 2,
+        "safety_house": 2,
+        "delivery_box": 6
+      },
+      "risk_factors": {
+        "sexual_offender": 14
+      }
+    },
+    {
+      "dong_code": "76086",
+      "district": "강동구",
+      "dong": "성내1동",
+      "grade": "E",
+      "score": 58.87,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 3,
+        "streetlight": 41,
+        "police_station": 2,
+        "safety_house": 1,
+        "delivery_box": 21
+      },
+      "risk_factors": {
+        "sexual_offender": 9
+      }
+    },
+    {
+      "dong_code": "51241",
+      "district": "강동구",
+      "dong": "성내2동",
+      "grade": "D",
+      "score": 70.89,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 90,
+        "streetlight": 262,
+        "police_station": 1,
+        "safety_house": 1,
+        "delivery_box": 15
+      },
+      "risk_factors": {
+        "sexual_offender": 10
+      }
+    },
+    {
+      "dong_code": "88842",
+      "district": "강동구",
+      "dong": "성내3동",
+      "grade": "E",
+      "score": 48.97,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 5,
+        "streetlight": 25,
+        "police_station": 1,
+        "safety_house": 1,
+        "delivery_box": 4
+      },
+      "risk_factors": {
+        "sexual_offender": 4
+      }
+    },
+    {
+      "dong_code": "10660",
+      "district": "강동구",
+      "dong": "암사1동",
+      "grade": "A",
+      "score": 102.77,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 33,
+        "streetlight": 292,
+        "police_station": 4,
+        "safety_house": 20,
+        "delivery_box": 23
+      },
+      "risk_factors": {
+        "sexual_offender": 3
+      }
+    },
+    {
+      "dong_code": "30918",
+      "district": "강동구",
+      "dong": "암사2동",
+      "grade": "B",
+      "score": 81.39,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 100,
+        "streetlight": 63,
+        "police_station": 4,
+        "safety_house": 20,
+        "delivery_box": 18
+      },
+      "risk_factors": {
+        "sexual_offender": 14
+      }
+    },
+    {
+      "dong_code": "25432",
+      "district": "강동구",
+      "dong": "암사3동",
+      "grade": "E",
+      "score": 61.18,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 37,
+        "streetlight": 63,
+        "police_station": 4,
+        "safety_house": 4,
+        "delivery_box": 9
+      },
+      "risk_factors": {
+        "sexual_offender": 8
+      }
+    },
+    {
+      "dong_code": "60451",
+      "district": "강동구",
+      "dong": "암사동",
+      "grade": "D",
+      "score": 64.73,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 85,
+        "streetlight": 42,
+        "police_station": 1,
+        "safety_house": 10,
+        "delivery_box": 0
+      },
+      "risk_factors": {
+        "sexual_offender": 14
+      }
+    },
+    {
+      "dong_code": "44076",
+      "district": "강동구",
+      "dong": "천호1동",
+      "grade": "B",
+      "score": 79.31,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 25,
+        "streetlight": 215,
+        "police_station": 1,
+        "safety_house": 3,
+        "delivery_box": 24
+      },
+      "risk_factors": {
+        "sexual_offender": 6
+      }
+    },
+    {
+      "dong_code": "35486",
+      "district": "강동구",
+      "dong": "천호2동",
+      "grade": "B",
+      "score": 81.75,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 29,
+        "streetlight": 289,
+        "police_station": 2,
+        "safety_house": 5,
+        "delivery_box": 26
+      },
+      "risk_factors": {
+        "sexual_offender": 7
+      }
+    },
+    {
+      "dong_code": "82570",
+      "district": "강동구",
+      "dong": "천호3동",
+      "grade": "D",
+      "score": 69.19,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 35,
+        "streetlight": 212,
+        "police_station": 4,
+        "safety_house": 18,
+        "delivery_box": 7
+      },
+      "risk_factors": {
+        "sexual_offender": 14
+      }
+    },
+    {
+      "dong_code": "21473",
+      "district": "강서구",
+      "dong": "가양1동",
+      "grade": "C",
+      "score": 77.1,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 59,
+        "streetlight": 193,
+        "police_station": 3,
+        "safety_house": 5,
+        "delivery_box": 23
+      },
+      "risk_factors": {
+        "sexual_offender": 8
+      }
+    },
+    {
+      "dong_code": "62274",
+      "district": "강서구",
+      "dong": "가양2동",
+      "grade": "D",
+      "score": 71.06,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 37,
+        "streetlight": 250,
+        "police_station": 1,
+        "safety_house": 1,
+        "delivery_box": 22
+      },
+      "risk_factors": {
+        "sexual_offender": 9
+      }
+    },
+    {
+      "dong_code": "36277",
+      "district": "강서구",
+      "dong": "가양3동",
+      "grade": "E",
+      "score": 62.63,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 87,
+        "streetlight": 30,
+        "police_station": 1,
+        "safety_house": 9,
+        "delivery_box": 8
+      },
+      "risk_factors": {
+        "sexual_offender": 10
+      }
+    },
+    {
+      "dong_code": "38667",
+      "district": "강서구",
+      "dong": "가양동",
+      "grade": "D",
+      "score": 69.96,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 45,
+        "streetlight": 64,
+        "police_station": 2,
+        "safety_house": 3,
+        "delivery_box": 7
+      },
+      "risk_factors": {
+        "sexual_offender": 7
+      }
+    },
+    {
+      "dong_code": "52941",
+      "district": "강서구",
+      "dong": "개화동",
+      "grade": "D",
+      "score": 65.9,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 37,
+        "streetlight": 46,
+        "police_station": 5,
+        "safety_house": 21,
+        "delivery_box": 19
+      },
+      "risk_factors": {
+        "sexual_offender": 12
+      }
+    },
+    {
+      "dong_code": "45994",
+      "district": "강서구",
+      "dong": "공항동",
+      "grade": "A",
+      "score": 90.05,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 88,
+        "streetlight": 219,
+        "police_station": 5,
+        "safety_house": 24,
+        "delivery_box": 11
+      },
+      "risk_factors": {
+        "sexual_offender": 3
+      }
+    },
+    {
+      "dong_code": "59025",
+      "district": "강서구",
+      "dong": "내발산동",
+      "grade": "D",
+      "score": 66.99,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 82,
+        "streetlight": 286,
+        "police_station": 0,
+        "safety_house": 25,
+        "delivery_box": 27
+      },
+      "risk_factors": {
+        "sexual_offender": 6
+      }
+    },
+    {
+      "dong_code": "74807",
+      "district": "강서구",
+      "dong": "단지1502동",
+      "grade": "A",
+      "score": 99.44,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 79,
+        "streetlight": 263,
+        "police_station": 1,
+        "safety_house": 11,
+        "delivery_box": 22
+      },
+      "risk_factors": {
+        "sexual_offender": 1
+      }
+    },
+    {
+      "dong_code": "43597",
+      "district": "강서구",
+      "dong": "등촌1동",
+      "grade": "D",
+      "score": 68.25,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 2,
+        "streetlight": 87,
+        "police_station": 5,
+        "safety_house": 23,
+        "delivery_box": 21
+      },
+      "risk_factors": {
+        "sexual_offender": 4
+      }
+    },
+    {
+      "dong_code": "62389",
+      "district": "강서구",
+      "dong": "등촌2동",
+      "grade": "A",
+      "score": 89.15,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 62,
+        "streetlight": 130,
+        "police_station": 5,
+        "safety_house": 6,
+        "delivery_box": 8
+      },
+      "risk_factors": {
+        "sexual_offender": 5
+      }
+    },
+    {
+      "dong_code": "14501",
+      "district": "강서구",
+      "dong": "등촌3동",
+      "grade": "D",
+      "score": 65.41,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 4,
+        "streetlight": 65,
+        "police_station": 5,
+        "safety_house": 18,
+        "delivery_box": 7
+      },
+      "risk_factors": {
+        "sexual_offender": 3
+      }
+    },
+    {
+      "dong_code": "28213",
+      "district": "강서구",
+      "dong": "등촌동",
+      "grade": "D",
+      "score": 70.68,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 37,
+        "streetlight": 144,
+        "police_station": 1,
+        "safety_house": 18,
+        "delivery_box": 19
+      },
+      "risk_factors": {
+        "sexual_offender": 7
+      }
+    },
+    {
+      "dong_code": "38167",
+      "district": "강서구",
+      "dong": "마곡동",
+      "grade": "A",
+      "score": 97.14,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 40,
+        "streetlight": 126,
+        "police_station": 1,
+        "safety_house": 19,
+        "delivery_box": 0
+      },
+      "risk_factors": {
+        "sexual_offender": 0
+      }
+    },
+    {
+      "dong_code": "65975",
+      "district": "강서구",
+      "dong": "발산1동",
+      "grade": "B",
+      "score": 82.17,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 45,
+        "streetlight": 300,
+        "police_station": 2,
+        "safety_house": 12,
+        "delivery_box": 28
+      },
+      "risk_factors": {
+        "sexual_offender": 6
+      }
+    },
+    {
+      "dong_code": "99079",
+      "district": "강서구",
+      "dong": "발산2동",
+      "grade": "A",
+      "score": 95.78,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 99,
+        "streetlight": 268,
+        "police_station": 4,
+        "safety_house": 20,
+        "delivery_box": 28
+      },
+      "risk_factors": {
+        "sexual_offender": 3
+      }
+    },
+    {
+      "dong_code": "33297",
+      "district": "강서구",
+      "dong": "발산동",
+      "grade": "D",
+      "score": 65.53,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 6,
+        "streetlight": 214,
+        "police_station": 4,
+        "safety_house": 24,
+        "delivery_box": 21
+      },
+      "risk_factors": {
+        "sexual_offender": 5
+      }
+    },
+    {
+      "dong_code": "08497",
+      "district": "강서구",
+      "dong": "방화1동",
+      "grade": "C",
+      "score": 75.64,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 32,
+        "streetlight": 121,
+        "police_station": 3,
+        "safety_house": 9,
+        "delivery_box": 0
+      },
+      "risk_factors": {
+        "sexual_offender": 4
+      }
+    },
+    {
+      "dong_code": "05010",
+      "district": "강서구",
+      "dong": "방화2동",
+      "grade": "A",
+      "score": 100.54,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 70,
+        "streetlight": 118,
+        "police_station": 2,
+        "safety_house": 5,
+        "delivery_box": 23
+      },
+      "risk_factors": {
+        "sexual_offender": 1
+      }
+    },
+    {
+      "dong_code": "73614",
+      "district": "강서구",
+      "dong": "방화3동",
+      "grade": "D",
+      "score": 70.73,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 99,
+        "streetlight": 106,
+        "police_station": 0,
+        "safety_house": 2,
+        "delivery_box": 20
+      },
+      "risk_factors": {
+        "sexual_offender": 2
+      }
+    },
+    {
+      "dong_code": "22607",
+      "district": "강서구",
+      "dong": "방화동",
+      "grade": "A",
+      "score": 94.31,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 80,
+        "streetlight": 154,
+        "police_station": 1,
+        "safety_house": 19,
+        "delivery_box": 10
+      },
+      "risk_factors": {
+        "sexual_offender": 2
+      }
+    },
+    {
+      "dong_code": "28815",
+      "district": "강서구",
+      "dong": "염창동",
+      "grade": "C",
+      "score": 76.11,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 75,
+        "streetlight": 37,
+        "police_station": 1,
+        "safety_house": 18,
+        "delivery_box": 0
+      },
+      "risk_factors": {
+        "sexual_offender": 11
+      }
+    },
+    {
+      "dong_code": "52621",
+      "district": "강서구",
+      "dong": "외발산동",
+      "grade": "D",
+      "score": 68.32,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 72,
+        "streetlight": 11,
+        "police_station": 4,
+        "safety_house": 21,
+        "delivery_box": 21
+      },
+      "risk_factors": {
+        "sexual_offender": 4
+      }
+    },
+    {
+      "dong_code": "24548",
+      "district": "강서구",
+      "dong": "우장산동",
+      "grade": "C",
+      "score": 73.37,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 17,
+        "streetlight": 269,
+        "police_station": 0,
+        "safety_house": 23,
+        "delivery_box": 16
+      },
+      "risk_factors": {
+        "sexual_offender": 13
+      }
+    },
+    {
+      "dong_code": "46144",
+      "district": "강서구",
+      "dong": "화곡1동",
+      "grade": "A",
+      "score": 104.91,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 35,
+        "streetlight": 274,
+        "police_station": 5,
+        "safety_house": 0,
+        "delivery_box": 25
+      },
+      "risk_factors": {
+        "sexual_offender": 2
+      }
+    },
+    {
+      "dong_code": "28790",
+      "district": "강서구",
+      "dong": "화곡2동",
+      "grade": "C",
+      "score": 77.19,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 28,
+        "streetlight": 127,
+        "police_station": 2,
+        "safety_house": 18,
+        "delivery_box": 24
+      },
+      "risk_factors": {
+        "sexual_offender": 9
+      }
+    },
+    {
+      "dong_code": "41799",
+      "district": "강서구",
+      "dong": "화곡3동",
+      "grade": "A",
+      "score": 96.38,
+      "coordinates": {
+        "lat": 37.5665,
+        "lng": 126.978
+      },
+      "facilities": {
+        "cctv": 25,
+        "streetlight": 226,
+        "police_station": 4,
+        "safety_house": 14,
+        "delivery_box": 15
+      },
+      "risk_factors": {
+        "sexual_offender": 2
+      }
+    }
+  ]
+}

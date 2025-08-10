@@ -40,7 +40,7 @@ export class PublicDataService {
     }
 
     try {
-      const dataPath = path.join('/home/rem/shesaw/safety_data_project/data/map_data.json');
+      const dataPath = path.join(__dirname, '../../data/map_data.json');
       const rawData = fs.readFileSync(dataPath, 'utf-8');
       const jsonData = JSON.parse(rawData);
       
