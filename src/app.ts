@@ -4,13 +4,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
-import postRoutes from './routes/postRoutes';
-import authRoutes from './routes/auth';
+import reviewRoutes from './routes/reviewRoutes';
+import restrictedRoutes from './routes/restrictedRoutes';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(helmet());
@@ -25,7 +25,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // Routes
 app.get('/', (req: Request, res: Response) => {
   res.json({
-    message: 'SheSawLabs Server API',
+    message: 'CPTED Review Analyzer Server API',
     version: '1.0.0',
     status: 'running'
   });
@@ -39,8 +39,8 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API Routes
-app.use('/api/posts', postRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/review', reviewRoutes);
+app.use('/api/restricted', restrictedRoutes);
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
