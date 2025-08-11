@@ -33,9 +33,9 @@ export class UserModel {
         
         const result = await client.query(updateQuery, [
           existingUser.rows[0].id,
-          kakaoUser.nickname,
-          kakaoUser.profileImage,
-          kakaoUser.thumbnailImage
+          kakaoUser.nickname || kakaoUser.properties?.nickname,
+          kakaoUser.profileImage || kakaoUser.properties?.profile_image,
+          kakaoUser.thumbnailImage || kakaoUser.properties?.thumbnail_image
         ]);
         
         await client.query('COMMIT');
@@ -53,9 +53,9 @@ export class UserModel {
         const result = await client.query(insertQuery, [
           'kakao',
           kakaoUser.id,
-          kakaoUser.nickname,
-          kakaoUser.profileImage,
-          kakaoUser.thumbnailImage
+          kakaoUser.nickname || kakaoUser.properties?.nickname,
+          kakaoUser.profileImage || kakaoUser.properties?.profile_image,
+          kakaoUser.thumbnailImage || kakaoUser.properties?.thumbnail_image
         ]);
         
         await client.query('COMMIT');
@@ -114,21 +114,14 @@ export class UserModel {
   private static mapDbRowToUser(row: any): User {
     return {
       id: row.id,
-      provider: row.provider,
-      providerId: row.provider_id,
-      name: row.name,
-      email: row.email,
+      kakao_id: row.provider_id,
+      email: row.email || '',
       nickname: row.nickname,
-      profileImage: row.profile_image,
-      thumbnailImage: row.thumbnail_image,
-      gender: row.gender,
-      birthday: row.birthday,
-      birthyear: row.birthyear,
-      ageRange: row.age_range,
-      mobile: row.mobile,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
-      lastLoginAt: new Date(row.last_login_at)
+      profile_image: row.profile_image,
+      created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
+      provider: row.provider,
+      providerId: row.provider_id
     };
   }
 }

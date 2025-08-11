@@ -49,7 +49,7 @@ export class AuthController {
 
       // 4. JWT 토큰 생성
       const jwtToken = JWTUtil.generateToken({
-        userId: user.id,
+        user_id: user.id,
         provider: user.provider,
         providerId: user.providerId,
         email: user.email,
@@ -100,13 +100,15 @@ export class AuthController {
         message: '토큰이 유효합니다.',
         data: {
           token: token,
-          user: await UserModel.findById(decoded.userId) || {
-            id: decoded.userId,
+          user: await UserModel.findById(parseInt(decoded.user_id)) || {
+            id: decoded.user_id,
             provider: decoded.provider,
             providerId: decoded.providerId,
-            name: null,
+            kakao_id: decoded.providerId || '',
             email: decoded.email,
-            nickname: decoded.nickname,
+            nickname: decoded.nickname || '',
+            created_at: new Date(),
+            updated_at: new Date(),
             profileImage: null,
             thumbnailImage: null,
             gender: null,
