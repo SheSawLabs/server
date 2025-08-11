@@ -6,13 +6,22 @@ const VALID_CATEGORIES: PostCategory[] = ['수리', '소분', '취미', '기타'
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, content, category, author_name, location, date, min_participants, max_participants } = req.body;
+    const { title, content, category, location, date, min_participants, max_participants } = req.body;
+    const userId = req.user?.user_id;
+    const authorName = req.user?.nickname;
     
     // Basic validation
-    if (!title || !content || !category || !author_name) {
+    if (!title || !content || !category) {
       res.status(400).json({
         error: 'Missing required fields',
-        required: ['title', 'content', 'category', 'author_name']
+        required: ['title', 'content', 'category']
+      });
+      return;
+    }
+    
+    if (!userId || !authorName) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -54,7 +63,7 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
       title,
       content,
       category,
-      author_name: author_name.trim(),
+      author_id: parseInt(userId),
       image_url: imageUrl,
       location: category !== '일반' ? location : undefined,
       date: category !== '일반' && date ? new Date(date) : undefined,

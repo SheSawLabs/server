@@ -4,24 +4,24 @@ import pool from '../config/database';
 export interface Like {
   id: string;
   post_id: string;
-  user_name: string;
+  user_id: number;
   created_at: Date;
 }
 
 export interface CreateLikeData {
   post_id: string;
-  user_name: string;
+  user_id: number;
 }
 
 export class LikeModel {
   // Add like (toggle functionality)
   static async toggle(data: CreateLikeData): Promise<{ liked: boolean; likeCount: number }> {
     // Check if already liked
-    const existingLike = await this.findByPostAndUser(data.post_id, data.user_name);
+    const existingLike = await this.findByPostAndUser(data.post_id, data.user_id);
     
     if (existingLike) {
       // Unlike - remove existing like
-      await this.remove(data.post_id, data.user_name);
+      await this.remove(data.post_id, data.user_id);
       const likeCount = await this.getCountByPostId(data.post_id);
       return { liked: false, likeCount };
     } else {
@@ -30,36 +30,36 @@ export class LikeModel {
       const now = new Date();
       
       const query = `
-        INSERT INTO likes (id, post_id, user_name, created_at)
+        INSERT INTO likes (id, post_id, user_id, created_at)
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `;
       
-      await pool.query(query, [id, data.post_id, data.user_name, now]);
+      await pool.query(query, [id, data.post_id, data.user_id, now]);
       const likeCount = await this.getCountByPostId(data.post_id);
       return { liked: true, likeCount };
     }
   }
 
   // Remove like
-  static async remove(postId: string, userName: string): Promise<boolean> {
+  static async remove(postId: string, userId: number): Promise<boolean> {
     const query = `
       DELETE FROM likes 
-      WHERE post_id = $1 AND user_name = $2
+      WHERE post_id = $1 AND user_id = $2
     `;
     
-    const result = await pool.query(query, [postId, userName]);
+    const result = await pool.query(query, [postId, userId]);
     return (result.rowCount ?? 0) > 0;
   }
 
   // Find like by post and user
-  static async findByPostAndUser(postId: string, userName: string): Promise<Like | null> {
+  static async findByPostAndUser(postId: string, userId: number): Promise<Like | null> {
     const query = `
       SELECT * FROM likes 
-      WHERE post_id = $1 AND user_name = $2
+      WHERE post_id = $1 AND user_id = $2
     `;
     
-    const result = await pool.query(query, [postId, userName]);
+    const result = await pool.query(query, [postId, userId]);
     return result.rows[0] || null;
   }
 
@@ -87,8 +87,8 @@ export class LikeModel {
   }
 
   // Check if user liked the post
-  static async isLikedByUser(postId: string, userName: string): Promise<boolean> {
-    const like = await this.findByPostAndUser(postId, userName);
+  static async isLikedByUser(postId: string, userId: number): Promise<boolean> {
+    const like = await this.findByPostAndUser(postId, userId);
     return like !== null;
   }
 }
