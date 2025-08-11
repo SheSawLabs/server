@@ -8,6 +8,7 @@ import { promises as fs } from 'fs';
 import postRoutes from './routes/postRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import restrictedRoutes from './routes/restrictedRoutes';
+import authRoutes from './routes/auth';
 import { MapData, ReportData, DongData } from './types';
 
 dotenv.config();
@@ -71,20 +72,21 @@ async function loadSafetyData(): Promise<void> {
 app.use('/api/posts', postRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/restricted', restrictedRoutes);
+app.use('/auth', authRoutes);
 
 // Safety API Routes
 app.get('/api/safety/map', (req: Request, res: Response) => {
   if (!mapData) {
     return res.status(503).json({ error: 'Safety data not loaded' });
   }
-  res.json(mapData);
+  return res.json(mapData);
 });
 
 app.get('/api/safety/report', (req: Request, res: Response) => {
   if (!reportData) {
     return res.status(503).json({ error: 'Safety data not loaded' });
   }
-  res.json(reportData);
+  return res.json(reportData);
 });
 
 app.get('/api/safety/dong/:dongCode', (req: Request, res: Response) => {
@@ -99,7 +101,7 @@ app.get('/api/safety/dong/:dongCode', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Dong not found' });
   }
   
-  res.json(dong);
+  return res.json(dong);
 });
 
 app.get('/api/safety/district/:district', (req: Request, res: Response) => {
@@ -114,7 +116,7 @@ app.get('/api/safety/district/:district', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'District not found' });
   }
   
-  res.json({
+  return res.json({
     district,
     count: dongs.length,
     data: dongs
@@ -129,7 +131,7 @@ app.get('/api/safety/grade/:grade', (req: Request, res: Response) => {
   const grade = req.params.grade.toUpperCase() as 'A' | 'B' | 'C' | 'D' | 'E';
   const dongs = mapData.data.filter((d: DongData) => d.grade === grade);
   
-  res.json({
+  return res.json({
     grade,
     count: dongs.length,
     data: dongs
@@ -145,9 +147,9 @@ app.use('*', (req: Request, res: Response) => {
 });
 
 // Error handler
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, req: Request, res: Response, next: any) => {
   console.error(err.stack);
-  res.status(500).json({
+  return res.status(500).json({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
