@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { promises as fs } from 'fs';
 import postRoutes from './routes/postRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import restrictedRoutes from './routes/restrictedRoutes';
 import { MapData, ReportData, DongData } from './types';
 
 dotenv.config();
@@ -67,6 +69,8 @@ async function loadSafetyData(): Promise<void> {
 
 // API Routes
 app.use('/api/posts', postRoutes);
+app.use('/api/review', reviewRoutes);
+app.use('/api/restricted', restrictedRoutes);
 
 // Safety API Routes
 app.get('/api/safety/map', (req: Request, res: Response) => {

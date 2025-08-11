@@ -1,0 +1,148 @@
+{
+  "cptedCategories": {
+    "naturalSurveillance": {
+      "name": "자연적 감시",
+      "description": "밤길 밝기, 시야 확보 여부",
+      "keywords": [
+        {
+          "keyword": "밝음",
+          "weight": 0.8,
+          "positiveImpact": true,
+          "synonyms": ["밝다", "환하다", "밝은", "환한", "빛나는", "조명이 좋다", "가로등 많음"]
+        },
+        {
+          "keyword": "어두움",
+          "weight": 0.9,
+          "positiveImpact": false,
+          "synonyms": ["어둡다", "캄캄하다", "어두운", "깜깜한", "조명부족", "가로등없음", "어둑하다"]
+        },
+        {
+          "keyword": "시야트임",
+          "weight": 0.8,
+          "positiveImpact": false,
+          "synonyms": ["시야차단", "가려진", "안보인다", "보이지않는", "차단된", "막힌"]
+        }
+      ]
+    },
+    "naturalAccessControl": {
+      "name": "자연적 접근 통제",
+      "description": "동네 개방감",
+      "keywords": [
+        {
+          "keyword": "한적",
+          "weight": 0.6,
+          "positiveImpact": false,
+          "synonyms": ["조용한", "한산한", "사람없는", "적막한", "인적드문"]
+        },
+        {
+          "keyword": "복잡",
+          "weight": 0.7,
+          "positiveImpact": true,
+          "synonyms": ["붐비는", "사람많은", "북적거리는", "번화한", "활기찬"]
+        },
+        {
+          "keyword": "골목많음",
+          "weight": 0.5,
+          "positiveImpact": false,
+          "synonyms": ["골목길", "샛길많음", "복잡한길", "미로같은", "갈래길"]
+        }
+      ]
+    },
+    "territoriality": {
+      "name": "영역성 강화",
+      "description": "동네가 관리되고 있는 느낌",
+      "keywords": [
+        {
+          "keyword": "어수선",
+          "weight": 0.7,
+          "positiveImpact": false,
+          "synonyms": ["어수선한", "뒤죽박죽", "무질서", "정리안됨", "엉망"]
+        },
+        {
+          "keyword": "깔끔",
+          "weight": 0.8,
+          "positiveImpact": true,
+          "synonyms": ["깔끔한", "정돈된", "잘정리된", "단정한", "깨끗한"]
+        },
+        {
+          "keyword": "방치됨",
+          "weight": 0.8,
+          "positiveImpact": false,
+          "synonyms": ["방치된", "관리안됨", "무관심", "버려진", "신경안쓴"]
+        }
+      ]
+    },
+    "activitySupport": {
+      "name": "활동 활성화",
+      "description": "사람 왕래, 활동성 여부",
+      "keywords": [
+        {
+          "keyword": "주요상권있음",
+          "weight": 0.8,
+          "positiveImpact": true,
+          "synonyms": ["상가많음", "가게많음", "상권", "번화가", "상업지역"]
+        },
+        {
+          "keyword": "공원있음",
+          "weight": 0.7,
+          "positiveImpact": true,
+          "synonyms": ["공원", "녹지", "휴식공간", "놀이터", "운동시설"]
+        }
+      ]
+    },
+    "maintenance": {
+      "name": "유지관리",
+      "description": "환경 관리 상태",
+      "keywords": [
+        {
+          "keyword": "깨끗",
+          "weight": 0.7,
+          "positiveImpact": true,
+          "synonyms": ["깨끗한", "청결한", "정갈한", "단정한", "위생적인"]
+        },
+        {
+          "keyword": "쓰레기많음",
+          "weight": 0.9,
+          "positiveImpact": false,
+          "synonyms": ["더럽다", "지저분한", "불결한", "쓰레기투성이", "오물"]
+        },
+        {
+          "keyword": "방치",
+          "weight": 0.8,
+          "positiveImpact": false,
+          "synonyms": ["방치된", "관리안됨", "낡은", "파손된", "망가진"]
+        }
+      ]
+    },
+    "emotional": {
+      "name": "감정형",
+      "description": "체감 안전도",
+      "keywords": [
+        {
+          "keyword": "안심",
+          "weight": 0.9,
+          "positiveImpact": true,
+          "synonyms": ["안전한", "편안한", "안심되는", "든든한", "믿을만한"]
+        },
+        {
+          "keyword": "약간불안",
+          "weight": 0.6,
+          "positiveImpact": false,
+          "synonyms": ["조금불안", "살짝걱정", "약간무서운", "조금위험"]
+        },
+        {
+          "keyword": "불안",
+          "weight": 0.8,
+          "positiveImpact": false,
+          "synonyms": ["불안한", "무서운", "두려운", "걱정되는", "위험해보이는"]
+        },
+        {
+          "keyword": "위험",
+          "weight": 1.0,
+          "positiveImpact": false,
+          "synonyms": ["위험한", "매우무서운", "극도로불안", "치명적", "매우위험"]
+        }
+      ]
+    }
+  }
+}
