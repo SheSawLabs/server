@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS posts (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     category VARCHAR(50) NOT NULL CHECK (category IN ('수리', '소분', '취미', '기타', '일반')),
-    author_name VARCHAR(255) NOT NULL,
+    author_id INTEGER NOT NULL,
     image_url VARCHAR(500),
     location VARCHAR(255),
     date TIMESTAMP WITH TIME ZONE,

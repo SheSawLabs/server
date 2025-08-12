@@ -9,13 +9,21 @@ import { CommentLikeModel } from '../models/commentLike';
 export const createComment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params; // post_id
-    const { author_name, content, parent_comment_id } = req.body;
+    const { content, parent_comment_id } = req.body;
+    const userId = req.user?.user_id;
     
     // Validation
-    if (!author_name || !content || author_name.trim().length === 0 || content.trim().length === 0) {
+    if (!content || content.trim().length === 0) {
       res.status(400).json({
         error: 'Missing required fields',
-        required: ['author_name', 'content']
+        required: ['content']
+      });
+      return;
+    }
+    
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -31,8 +39,8 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
 
     // For meetups (non-general posts), check if user is the author or a participant
     if (post.category !== '일반') {
-      const isAuthor = post.author_name === author_name.trim();
-      const isParticipant = await ParticipantModel.isParticipant(id, author_name.trim());
+      const isAuthor = post.author_id === parseInt(userId);
+      const isParticipant = await ParticipantModel.isParticipant(id, userId);
       
       if (!isAuthor && !isParticipant) {
         res.status(403).json({
@@ -66,7 +74,7 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
     const comment = await CommentModel.create({
       post_id: id,
       parent_comment_id: parent_comment_id || undefined,
-      author_name: author_name.trim(),
+      author_id: parseInt(userId),
       content: content.trim()
     });
 
@@ -88,7 +96,7 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
 export const getComments = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params; // post_id
-    const { user_name } = req.query; // For meetup access control
+    const userId = req.user?.user_id; // From JWT token (optional auth)
     
     // Check if post exists
     const post = await PostModel.findById(id);
@@ -101,16 +109,16 @@ export const getComments = async (req: Request, res: Response): Promise<void> =>
 
     // For meetups (non-general posts), check if user is the author or a participant
     if (post.category !== '일반') {
-      if (!user_name || typeof user_name !== 'string') {
-        res.status(400).json({
-          error: 'user_name query parameter is required for meetup comments',
-          message: 'Provide ?user_name=your_name to view meetup comments'
+      if (!userId) {
+        res.status(401).json({
+          error: 'Authentication required for meetup comments',
+          message: 'You must be logged in to view meetup comments'
         });
         return;
       }
 
-      const isAuthor = post.author_name === user_name.trim();
-      const isParticipant = await ParticipantModel.isParticipant(id, user_name.trim());
+      const isAuthor = post.author_id === parseInt(userId);
+      const isParticipant = await ParticipantModel.isParticipant(id, userId);
       
       if (!isAuthor && !isParticipant) {
         res.status(403).json({
@@ -150,12 +158,12 @@ export const getComments = async (req: Request, res: Response): Promise<void> =>
 export const deleteComment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, commentId } = req.params; // post_id, comment_id
-    const { author_name } = req.body;
+    const userId = req.user?.user_id;
     
     // Validation
-    if (!author_name || author_name.trim().length === 0) {
-      res.status(400).json({
-        error: 'Missing required field: author_name'
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -187,12 +195,11 @@ export const deleteComment = async (req: Request, res: Response): Promise<void> 
     }
 
     // Delete comment (only author can delete)
-    const deleted = await CommentModel.deleteById(commentId, author_name.trim());
+    const deleted = await CommentModel.deleteById(commentId, parseInt(userId));
     
     if (!deleted) {
       res.status(403).json({
-        error: 'Only the comment author can delete this comment',
-        author: comment.author_name
+        error: 'Only the comment author can delete this comment'
       });
       return;
     }
@@ -214,12 +221,12 @@ export const deleteComment = async (req: Request, res: Response): Promise<void> 
 export const toggleLike = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params; // post_id
-    const { user_name } = req.body;
+    const userId = req.user?.user_id;
     
     // Validation
-    if (!user_name || user_name.trim().length === 0) {
-      res.status(400).json({
-        error: 'Missing required field: user_name'
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -236,7 +243,7 @@ export const toggleLike = async (req: Request, res: Response): Promise<void> => 
     // Toggle like
     const result = await LikeModel.toggle({
       post_id: id,
-      user_name: user_name.trim()
+      user_id: parseInt(userId)
     });
 
     res.json({
@@ -260,7 +267,7 @@ export const toggleLike = async (req: Request, res: Response): Promise<void> => 
 export const getLikes = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params; // post_id
-    const { user_name } = req.query;
+    const userId = req.user?.user_id; // From JWT token (optional auth)
     
     // Check if post exists
     const post = await PostModel.findById(id);
@@ -274,10 +281,10 @@ export const getLikes = async (req: Request, res: Response): Promise<void> => {
     // Get like count
     const likeCount = await LikeModel.getCountByPostId(id);
     
-    // Check if current user liked (if user_name provided)
+    // Check if current user liked (if userId provided)
     let isLiked = false;
-    if (user_name && typeof user_name === 'string') {
-      isLiked = await LikeModel.isLikedByUser(id, user_name.trim());
+    if (userId) {
+      isLiked = await LikeModel.isLikedByUser(id, parseInt(userId));
     }
 
     res.json({
@@ -301,12 +308,12 @@ export const getLikes = async (req: Request, res: Response): Promise<void> => {
 export const toggleCommentLike = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, commentId } = req.params; // post_id, comment_id
-    const { user_name } = req.body;
+    const userId = req.user?.user_id;
     
     // Validation
-    if (!user_name || user_name.trim().length === 0) {
-      res.status(400).json({
-        error: 'Missing required field: user_name'
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -339,7 +346,7 @@ export const toggleCommentLike = async (req: Request, res: Response): Promise<vo
     // Toggle comment like
     const result = await CommentLikeModel.toggle({
       comment_id: commentId,
-      user_name: user_name.trim()
+      user_id: parseInt(userId)
     });
 
     res.json({
@@ -364,7 +371,7 @@ export const toggleCommentLike = async (req: Request, res: Response): Promise<vo
 export const getCommentLikes = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, commentId } = req.params; // post_id, comment_id
-    const { user_name } = req.query;
+    const userId = req.user?.user_id; // From JWT token (optional auth)
     
     // Check if post exists
     const post = await PostModel.findById(id);
@@ -394,10 +401,10 @@ export const getCommentLikes = async (req: Request, res: Response): Promise<void
     // Get like count
     const likeCount = await CommentLikeModel.getCountByCommentId(commentId);
     
-    // Check if current user liked (if user_name provided)
+    // Check if current user liked (if userId provided)
     let isLiked = false;
-    if (user_name && typeof user_name === 'string') {
-      isLiked = await CommentLikeModel.isLikedByUser(commentId, user_name.trim());
+    if (userId) {
+      isLiked = await CommentLikeModel.isLikedByUser(commentId, parseInt(userId));
     }
 
     res.json({

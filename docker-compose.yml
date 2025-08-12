@@ -4,6 +4,10 @@ services:
   postgres:
     image: postgres:15
     container_name: cpted_analyzer_postgres
+    environment:
+      - POSTGRES_DB=shesawlabs_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
     env_file:
       - .env
     ports:
@@ -21,7 +25,7 @@ services:
     env_file:
       - .env
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - ./uploads:/app/uploads
     depends_on:
