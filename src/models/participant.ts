@@ -4,13 +4,13 @@ import pool from '../config/database';
 export interface Participant {
   id: string;
   post_id: string;
-  participant_name: string;
+  user_id: number;
   joined_at: Date;
 }
 
 export interface JoinMeetupData {
   post_id: string;
-  participant_name: string;
+  user_id: number;
 }
 
 export class ParticipantModel {
@@ -20,25 +20,25 @@ export class ParticipantModel {
     const now = new Date();
     
     const query = `
-      INSERT INTO meetup_participants (id, post_id, participant_name, joined_at)
+      INSERT INTO meetup_participants (id, post_id, user_id, joined_at)
       VALUES ($1, $2, $3, $4)
       RETURNING *
     `;
     
-    const values = [id, data.post_id, data.participant_name, now];
+    const values = [id, data.post_id, data.user_id, now];
     
     const result = await pool.query(query, values);
     return result.rows[0];
   }
 
   // Leave meetup
-  static async leave(postId: string, participantName: string): Promise<boolean> {
+  static async leave(postId: string, userId: string): Promise<boolean> {
     const query = `
       DELETE FROM meetup_participants 
-      WHERE post_id = $1 AND participant_name = $2
+      WHERE post_id = $1 AND user_id = $2
     `;
     
-    const result = await pool.query(query, [postId, participantName]);
+    const result = await pool.query(query, [postId, parseInt(userId)]);
     return (result.rowCount ?? 0) > 0;
   }
 
@@ -55,13 +55,13 @@ export class ParticipantModel {
   }
 
   // Check if already joined
-  static async isParticipant(postId: string, participantName: string): Promise<boolean> {
+  static async isParticipant(postId: string, userId: string): Promise<boolean> {
     const query = `
       SELECT 1 FROM meetup_participants 
-      WHERE post_id = $1 AND participant_name = $2
+      WHERE post_id = $1 AND user_id = $2
     `;
     
-    const result = await pool.query(query, [postId, participantName]);
+    const result = await pool.query(query, [postId, parseInt(userId)]);
     return result.rows.length > 0;
   }
 

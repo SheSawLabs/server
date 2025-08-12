@@ -6,13 +6,21 @@ const VALID_CATEGORIES: PostCategory[] = ['수리', '소분', '취미', '기타'
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, content, category, author_name, location, date, min_participants, max_participants } = req.body;
+    const { title, content, category, location, date, min_participants, max_participants } = req.body;
+    const userId = req.user?.user_id;
     
     // Basic validation
-    if (!title || !content || !category || !author_name) {
+    if (!title || !content || !category) {
       res.status(400).json({
         error: 'Missing required fields',
-        required: ['title', 'content', 'category', 'author_name']
+        required: ['title', 'content', 'category']
+      });
+      return;
+    }
+    
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -54,7 +62,7 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
       title,
       content,
       category,
-      author_name: author_name.trim(),
+      author_id: parseInt(userId),
       image_url: imageUrl,
       location: category !== '일반' ? location : undefined,
       date: category !== '일반' && date ? new Date(date) : undefined,
@@ -80,6 +88,7 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
 export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { category } = req.query;
+    const userId = req.user?.user_id;
     
     let posts;
     
@@ -92,9 +101,9 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
         });
         return;
       }
-      posts = await PostModel.findByCategory(category as PostCategory);
+      posts = await PostModel.findAll(category as PostCategory, userId);
     } else {
-      posts = await PostModel.findAll();
+      posts = await PostModel.findAll(undefined, userId);
     }
 
     res.json({
@@ -114,7 +123,8 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
 export const getPostById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const post = await PostModel.findById(id);
+    // 조회수 증가하면서 게시글 가져오기
+    const post = await PostModel.findById(id, true);
     
     if (!post) {
       res.status(404).json({
@@ -173,12 +183,12 @@ export const getGeneralPosts = async (req: Request, res: Response): Promise<void
 export const joinMeetup = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { participant_name } = req.body;
+    const userId = req.user?.user_id;
     
     // Validation
-    if (!participant_name || participant_name.trim().length === 0) {
-      res.status(400).json({
-        error: 'Missing required field: participant_name'
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -201,11 +211,11 @@ export const joinMeetup = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Check if already joined
-    const isAlreadyJoined = await ParticipantModel.isParticipant(id, participant_name.trim());
+    const isAlreadyJoined = await ParticipantModel.isParticipant(id, userId);
     if (isAlreadyJoined) {
       res.status(409).json({
         error: 'Already joined this meetup',
-        participant_name: participant_name.trim()
+        user_id: userId
       });
       return;
     }
@@ -225,7 +235,7 @@ export const joinMeetup = async (req: Request, res: Response): Promise<void> => 
     // Join the meetup
     const participant = await ParticipantModel.join({
       post_id: id,
-      participant_name: participant_name.trim()
+      user_id: parseInt(userId)
     });
 
     // Update meetup status based on new participant count
@@ -256,12 +266,12 @@ export const joinMeetup = async (req: Request, res: Response): Promise<void> => 
 export const leaveMeetup = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { participant_name } = req.body;
+    const userId = req.user?.user_id;
     
     // Validation
-    if (!participant_name || participant_name.trim().length === 0) {
-      res.status(400).json({
-        error: 'Missing required field: participant_name'
+    if (!userId) {
+      res.status(401).json({
+        error: 'User not authenticated'
       });
       return;
     }
@@ -294,12 +304,12 @@ export const leaveMeetup = async (req: Request, res: Response): Promise<void> =>
     }
 
     // Leave the meetup
-    const left = await ParticipantModel.leave(id, participant_name.trim());
+    const left = await ParticipantModel.leave(id, userId);
     
     if (!left) {
       res.status(404).json({
         error: 'Not a participant of this meetup',
-        participant_name: participant_name.trim()
+        user_id: userId
       });
       return;
     }
@@ -314,7 +324,7 @@ export const leaveMeetup = async (req: Request, res: Response): Promise<void> =>
       success: true,
       message: 'Successfully left the meetup',
       data: {
-        participant_name: participant_name.trim(),
+        user_id: userId,
         meetup_status: updatedMeetup?.status,
         current_participants: updatedMeetup?.current_participants,
         max_participants: updatedMeetup?.max_participants
@@ -332,6 +342,7 @@ export const leaveMeetup = async (req: Request, res: Response): Promise<void> =>
 export const getParticipants = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const userId = req.user?.user_id;
     
     // Check if post exists
     const post = await PostModel.findById(id);
@@ -343,19 +354,31 @@ export const getParticipants = async (req: Request, res: Response): Promise<void
     }
 
     if (post.category === '일반') {
-      res.status(400).json({
-        error: 'General posts do not have participants',
-        category: post.category
+      // For general posts, everyone can view comments
+      res.json({
+        success: true,
+        data: {
+          isParticipant: true,
+          isAuthor: userId ? post.author_id === parseInt(userId) : false,
+          participants: [],
+          total_participants: 0
+        }
       });
       return;
     }
 
     // Get participants
     const participants = await ParticipantModel.getByPostId(id);
+    
+    // Check if current user is author or participant
+    const isAuthor = userId ? post.author_id === parseInt(userId) : false;
+    const isParticipant = userId ? await ParticipantModel.isParticipant(id, userId) : false;
 
     res.json({
       success: true,
       data: {
+        isParticipant,
+        isAuthor,
         meetup: {
           id: post.id,
           title: post.title,

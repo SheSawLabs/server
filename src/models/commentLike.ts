@@ -4,24 +4,24 @@ import pool from '../config/database';
 export interface CommentLike {
   id: string;
   comment_id: string;
-  user_name: string;
+  user_id: number;
   created_at: Date;
 }
 
 export interface CreateCommentLikeData {
   comment_id: string;
-  user_name: string;
+  user_id: number;
 }
 
 export class CommentLikeModel {
   // Add like (toggle functionality)
   static async toggle(data: CreateCommentLikeData): Promise<{ liked: boolean; likeCount: number }> {
     // Check if already liked
-    const existingLike = await this.findByCommentAndUser(data.comment_id, data.user_name);
+    const existingLike = await this.findByCommentAndUser(data.comment_id, data.user_id);
     
     if (existingLike) {
       // Unlike - remove existing like
-      await this.remove(data.comment_id, data.user_name);
+      await this.remove(data.comment_id, data.user_id);
       const likeCount = await this.getCountByCommentId(data.comment_id);
       return { liked: false, likeCount };
     } else {
@@ -30,36 +30,36 @@ export class CommentLikeModel {
       const now = new Date();
       
       const query = `
-        INSERT INTO comment_likes (id, comment_id, user_name, created_at)
+        INSERT INTO comment_likes (id, comment_id, user_id, created_at)
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `;
       
-      await pool.query(query, [id, data.comment_id, data.user_name, now]);
+      await pool.query(query, [id, data.comment_id, data.user_id, now]);
       const likeCount = await this.getCountByCommentId(data.comment_id);
       return { liked: true, likeCount };
     }
   }
 
   // Remove like
-  static async remove(commentId: string, userName: string): Promise<boolean> {
+  static async remove(commentId: string, userId: number): Promise<boolean> {
     const query = `
       DELETE FROM comment_likes 
-      WHERE comment_id = $1 AND user_name = $2
+      WHERE comment_id = $1 AND user_id = $2
     `;
     
-    const result = await pool.query(query, [commentId, userName]);
+    const result = await pool.query(query, [commentId, userId]);
     return (result.rowCount ?? 0) > 0;
   }
 
   // Find like by comment and user
-  static async findByCommentAndUser(commentId: string, userName: string): Promise<CommentLike | null> {
+  static async findByCommentAndUser(commentId: string, userId: number): Promise<CommentLike | null> {
     const query = `
       SELECT * FROM comment_likes 
-      WHERE comment_id = $1 AND user_name = $2
+      WHERE comment_id = $1 AND user_id = $2
     `;
     
-    const result = await pool.query(query, [commentId, userName]);
+    const result = await pool.query(query, [commentId, userId]);
     return result.rows[0] || null;
   }
 
@@ -87,8 +87,8 @@ export class CommentLikeModel {
   }
 
   // Check if user liked the comment
-  static async isLikedByUser(commentId: string, userName: string): Promise<boolean> {
-    const like = await this.findByCommentAndUser(commentId, userName);
+  static async isLikedByUser(commentId: string, userId: number): Promise<boolean> {
+    const like = await this.findByCommentAndUser(commentId, userId);
     return like !== null;
   }
 }

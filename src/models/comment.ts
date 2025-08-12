@@ -5,7 +5,7 @@ export interface Comment {
   id: string;
   post_id: string;
   parent_comment_id?: string;
-  author_name: string;
+  author_id: number;
   content: string;
   created_at: Date;
   updated_at: Date;
@@ -14,7 +14,7 @@ export interface Comment {
 export interface CreateCommentData {
   post_id: string;
   parent_comment_id?: string;
-  author_name: string;
+  author_id: number;
   content: string;
 }
 
@@ -25,12 +25,12 @@ export class CommentModel {
     const now = new Date();
     
     const query = `
-      INSERT INTO comments (id, post_id, parent_comment_id, author_name, content, created_at, updated_at)
+      INSERT INTO comments (id, post_id, parent_comment_id, author_id, content, created_at, updated_at)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
     
-    const values = [id, data.post_id, data.parent_comment_id, data.author_name, data.content, now, now];
+    const values = [id, data.post_id, data.parent_comment_id, data.author_id, data.content, now, now];
     
     const result = await pool.query(query, values);
     return result.rows[0];
@@ -49,13 +49,13 @@ export class CommentModel {
   }
 
   // Delete comment by ID
-  static async deleteById(commentId: string, authorName: string): Promise<boolean> {
+  static async deleteById(commentId: string, authorId: number): Promise<boolean> {
     const query = `
       DELETE FROM comments 
-      WHERE id = $1 AND author_name = $2
+      WHERE id = $1 AND author_id = $2
     `;
     
-    const result = await pool.query(query, [commentId, authorName]);
+    const result = await pool.query(query, [commentId, authorId]);
     return (result.rowCount ?? 0) > 0;
   }
 
