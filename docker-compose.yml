@@ -4,6 +4,10 @@ services:
   postgres:
     image: postgres:15
     container_name: cpted_analyzer_postgres
+    environment:
+      - POSTGRES_DB=shesawlabs_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
     env_file:
       - .env
     ports:

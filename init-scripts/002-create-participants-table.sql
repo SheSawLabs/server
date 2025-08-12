@@ -2,11 +2,11 @@
 CREATE TABLE IF NOT EXISTS meetup_participants (
     id UUID PRIMARY KEY,
     post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    participant_name VARCHAR(100) NOT NULL,
+    user_id INTEGER NOT NULL,
     joined_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     
-    -- Prevent duplicate participation (same name for same meetup)
-    UNIQUE(post_id, participant_name)
+    -- Prevent duplicate participation (same user for same meetup)
+    UNIQUE(post_id, user_id)
 );
 
 -- Create indexes
