@@ -45,10 +45,10 @@ router.get('/dong/:dongName', async (req: Request, res: Response) => {
       streetlights: streetlights
     };
     
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     console.error('Error fetching streetlight data by dong:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -84,7 +84,7 @@ router.get('/district/:districtName', async (req: Request, res: Response) => {
       streetlights: lights
     }));
     
-    res.json({
+    return res.json({
       district: districtName,
       total_count: streetlights.length,
       dong_count: dongResults.length,
@@ -92,7 +92,7 @@ router.get('/district/:districtName', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error fetching streetlight data by district:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -105,13 +105,13 @@ router.get('/all', async (req: Request, res: Response) => {
       return res.status(503).json({ error: 'Streetlight data not loaded' });
     }
     
-    res.json({
+    return res.json({
       total_count: streetLightData.length,
       data: streetLightData
     });
   } catch (error) {
     console.error('Error fetching all streetlight data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

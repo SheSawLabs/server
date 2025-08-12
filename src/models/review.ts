@@ -1,5 +1,6 @@
 export interface Review {
   id?: number;
+  user_id?: number;
   title?: string;
   content?: string;
   author?: string;

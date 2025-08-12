@@ -11,15 +11,16 @@ export class ReviewService {
     
     const query = `
       INSERT INTO reviews (
-        id, review_text, location, time_of_day, rating, 
+        id, user_id, review_text, location, time_of_day, rating, 
         selected_keywords, recommended_keywords, score_result, 
         context_analysis, analysis_method, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
     `;
     
     const values = [
       id,
+      reviewData.user_id || null,
       reviewData.reviewText,
       reviewData.location,
       reviewData.timeOfDay,
@@ -142,6 +143,12 @@ export class ReviewService {
     const setFields = [];
     const values = [];
     let paramIndex = 1;
+    
+    if (updateData.user_id !== undefined) {
+      setFields.push(`user_id = $${paramIndex}`);
+      values.push(updateData.user_id);
+      paramIndex++;
+    }
     
     if (updateData.reviewText !== undefined) {
       setFields.push(`review_text = $${paramIndex}`);
@@ -367,6 +374,7 @@ export class ReviewService {
   private static mapDbRowToReview(row: any): Review {
     return {
       id: row.id,
+      user_id: row.user_id,
       reviewText: row.review_text,
       location: row.location,
       timeOfDay: row.time_of_day,

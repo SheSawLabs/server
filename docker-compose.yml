@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
-    container_name: cpted_analyzer_postgres
+    container_name: shesawlabs_postgres
     environment:
       - POSTGRES_DB=shesawlabs_db
       - POSTGRES_USER=postgres
@@ -21,7 +21,7 @@ services:
 
   app:
     build: .
-    container_name: cpted_analyzer_app
+    container_name: shesawlabs_app
     env_file:
       - .env
     ports:
