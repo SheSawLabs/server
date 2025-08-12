@@ -74,3 +74,19 @@ export interface ReportData {
   metadata: ReportDataMetadata;
   analysis: any;
 }
+
+export interface StreetLight {
+  id: number;
+  management_number: string;
+  district: string;
+  dong: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface StreetLightByDong {
+  dong: string;
+  district: string;
+  count: number;
+  streetlights: StreetLight[];
+}

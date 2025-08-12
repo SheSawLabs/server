@@ -8,7 +8,9 @@ import { promises as fs } from 'fs';
 import postRoutes from './routes/postRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import restrictedRoutes from './routes/restrictedRoutes';
-import { MapData, ReportData, DongData } from './types';
+import streetlightRoutes from './routes/streetlightRoutes';
+import safetyRoutes from './routes/safetyRoutes';
+import { MapData, ReportData, DongData, StreetLight, StreetLightByDong } from './types';
 
 dotenv.config();
 
@@ -71,6 +73,7 @@ async function loadSafetyData(): Promise<void> {
 app.use('/api/posts', postRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/restricted', restrictedRoutes);
+app.use('/api/streetlight', streetlightRoutes);
 
 // Safety API Routes
 app.get('/api/safety/map', (req: Request, res: Response) => {
@@ -133,6 +136,76 @@ app.get('/api/safety/grade/:grade', (req: Request, res: Response) => {
     grade,
     count: dongs.length,
     data: dongs
+  });
+});
+
+// Streetlight API Routes
+app.get('/api/streetlight/dong/:dongName', (req: Request, res: Response) => {
+  if (!streetLightData) {
+    return res.status(503).json({ error: 'Streetlight data not loaded' });
+  }
+  
+  const dongName = req.params.dongName;
+  const streetlights = streetLightData.filter((light: StreetLight) => light.dong === dongName);
+  
+  if (streetlights.length === 0) {
+    return res.status(404).json({ error: 'No streetlights found for this dong' });
+  }
+  
+  const result: StreetLightByDong = {
+    dong: dongName,
+    district: streetlights[0].district,
+    count: streetlights.length,
+    streetlights: streetlights
+  };
+  
+  res.json(result);
+});
+
+app.get('/api/streetlight/district/:districtName', (req: Request, res: Response) => {
+  if (!streetLightData) {
+    return res.status(503).json({ error: 'Streetlight data not loaded' });
+  }
+  
+  const districtName = req.params.districtName;
+  const streetlights = streetLightData.filter((light: StreetLight) => light.district === districtName);
+  
+  if (streetlights.length === 0) {
+    return res.status(404).json({ error: 'No streetlights found for this district' });
+  }
+  
+  // 동별로 그룹화
+  const dongGroups = streetlights.reduce((groups: Record<string, StreetLight[]>, light) => {
+    if (!groups[light.dong]) {
+      groups[light.dong] = [];
+    }
+    groups[light.dong].push(light);
+    return groups;
+  }, {});
+  
+  const dongResults: StreetLightByDong[] = Object.entries(dongGroups).map(([dong, lights]) => ({
+    dong,
+    district: districtName,
+    count: lights.length,
+    streetlights: lights
+  }));
+  
+  res.json({
+    district: districtName,
+    total_count: streetlights.length,
+    dong_count: dongResults.length,
+    data: dongResults
+  });
+});
+
+app.get('/api/streetlight/all', (req: Request, res: Response) => {
+  if (!streetLightData) {
+    return res.status(503).json({ error: 'Streetlight data not loaded' });
+  }
+  
+  res.json({
+    total_count: streetLightData.length,
+    data: streetLightData
   });
 });
 
