@@ -1,0 +1,74 @@
+{
+  "policies": [
+    {
+      "title": "2025년 하반기 서울형 가사서비스 신청",
+      "description": "서울시에서 제공하는 가사서비스 지원 프로그램입니다. 임산부, 맞벌이, 다자녀 가정을 대상으로 전문 가사도우미 서비스를 저렴한 비용으로 이용할 수 있도록 지원합니다.",
+      "application_period": "예산소진시",
+      "eligibility_criteria": "서울시 거주 중위소득 180% 이하 임산부, 맞벌이, 다자녀 가정 중 상반기 미참여 가구",
+      "link": "https://www.seoulmomcare.com/notice/userNoticeDetail.do",
+      "category": "주거",
+      "target_conditions": {
+        "income": ["중위소득 180% 이하"],
+        "family_type": ["임산부", "맞벌이", "다자녀 가정"],
+        "location": ["서울"],
+        "age": null
+      }
+    },
+    {
+      "title": "1인가구 전월세 안심계약 도움서비스",
+      "description": "무료로 주겅안심매니저(공인중개사 자격소유) 배치, 4대 도움서비스 제공합니다.",
+      "application_period": "2025년 12월 31일",
+      "eligibility_criteria": "서울시 거주 또는 거주예정인 1인가구",
+      "link": "https://1in.seoul.go.kr/front/sport/sportView.do?sport_id=a97db018d11c44af845fd028fde7104c&seoul_link_yn=Y",
+      "category": "주거",
+      "target_conditions": {
+        "income": [],
+        "family_type": ["1인가구"],
+        "location": ["서울"],
+        "age": null
+      }
+    },
+    {
+      "title": "2025년 영등포구 중장년 1인가구 행복한 밥상",
+      "description": "중장년의 의미있는 인생후반을 지원하는 영등포50플러스센터입니다. 중장년 1인가구 대상으로 행복한 밥상을 진행하고자 하니, 많은 관심과 참여 바랍니다.",
+      "application_period": "2025년 12월 31일",
+      "eligibility_criteria": "영등포구 주민 또는 재직자 중장년(40~67세) 1인가구, 기수별 14명",
+      "link": "https://1in.seoul.go.kr/front/partcptn/partcptnView.do?partcptn_id=058731905287413391e78c71e4e77f78",
+      "category": "기타",
+      "target_conditions": {
+        "income": [],
+        "family_type": ["1인가구"],
+        "location": ["서울", "영등포구"],
+        "age": ["40-67세"]
+      }
+    },
+    {
+      "title": "2025년 서울우먼업 구직지원금 지원 대상자 3차 모집 공고",
+      "description": "서울특별시에서는 '서울특별시 여성의 경제활동 촉진과 경력단절 예방에 관한 조례'에 따라 적극적인 취, 창업 의지가 있는 3040 여성들의 '경제활동 참여 촉진 및 지속가능한 일, 생활 지원'을 위해 '2025년 서울우먼업 구직지원금' 지원대상을 모집하오니 많은 참여바랍니다.",
+      "application_period": "2025년 09월 04일",
+      "eligibility_criteria": "구직활동을 성실히 수행하고 적극적 취, 창업 의사가 있는 30~49세 서울시 거주, 미취업 여성으로서 가구소득 기준 중위소득 150% 이하인 자",
+      "link": "https://swup.seoulwomanup.or.kr/swm/board/businessInformationNotice-bbs/434/view.do?page=1&pageCount=8&category=job_support_fund&menu_no=02010200&searchCnd=3&searchWrd=",
+      "category": "여성",
+      "target_conditions": {
+        "income": ["중위소득 150% 이하"],
+        "family_type": [],
+        "location": ["서울"],
+        "age": ["30-49세"]
+      }
+    },
+    {
+      "title": "청년 일자리사업 참여청년 모집",
+      "description": "지역기반 기업에서 일경험과 경력 형성을 지원하는 『2025년 은평구 청년 일자리사업』 참여청년을 아래와 같이 모집하오니, 청년 여러분의 많은 관심 바랍니다.",
+      "application_period": "2025년 08월 14일",
+      "eligibility_criteria": "구직활동을 성실히 수행하고 적극적 취, 창업 의사가 있는 30~49세 서울시 거주, 미취업 여성으로서 가구소득 기준 중위소득 150% 이하인 자",
+      "link": "https://www.ep.go.kr/www/selectEminwonView.do?pageUnit=10&pageIndex=1&searchCnd=all&key=748&notAncmtMgtNo=46711&notAncmtSeCode=02",
+      "category": "기타",
+      "target_conditions": {
+        "income": [],
+        "family_type": [],
+        "location": ["서울", "은평구"],
+        "age": ["19-39세"]
+      }
+    }
+  ]
+}

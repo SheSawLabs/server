@@ -9,7 +9,9 @@ import postRoutes from './routes/postRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import restrictedRoutes from './routes/restrictedRoutes';
 import streetlightRoutes from './routes/streetlightRoutes';
+import policyRoutes from './routes/policyRoutes';
 import authRoutes from './routes/auth';
+import { PolicyDataService } from './services/policyDataService';
 import { MapData, ReportData, DongData, StreetLight, StreetLightByDong } from './types';
 
 dotenv.config();
@@ -69,11 +71,31 @@ async function loadSafetyData(): Promise<void> {
   }
 }
 
+async function loadPolicyData(): Promise<void> {
+  try {
+    // 데이터베이스 연결 확인
+    const isConnected = await PolicyDataService.checkDatabaseConnection();
+    if (!isConnected) {
+      console.log('⚠️  Database not connected, skipping policy data loading');
+      return;
+    }
+
+    // policies 테이블 존재 확인
+    await PolicyDataService.ensurePolicyTable();
+    
+    // 정책 데이터 로드
+    await PolicyDataService.loadPolicyData();
+  } catch (error) {
+    console.error('❌ Failed to load policy data:', (error as Error).message);
+  }
+}
+
 // API Routes
 app.use('/api/posts', postRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/restricted', restrictedRoutes);
 app.use('/api/streetlight', streetlightRoutes);
+app.use('/api/policies', policyRoutes);
 app.use('/auth', authRoutes);
 
 // Safety API Routes
@@ -159,16 +181,20 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 
 async function startServer(): Promise<void> {
   await loadSafetyData();
+  await loadPolicyData();
   
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📡 Available safety endpoints:`);
+    console.log(`📡 Available endpoints:`);
     console.log(`   GET /api/safety/map - Full map data`);
     console.log(`   GET /api/safety/report - Detailed report`);
     console.log(`   GET /api/safety/dong/:dongCode - Specific dong data`);
     console.log(`   GET /api/safety/district/:district - District data`);
     console.log(`   GET /api/safety/grade/:grade - Filter by safety grade`);
+    console.log(`   GET /api/policies - All policies`);
+    console.log(`   GET /api/policies/:id - Specific policy`);
+    console.log(`   GET /api/policies?category=여성 - Filter by category`);
   });
 }
 
