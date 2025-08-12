@@ -286,31 +286,6 @@ export class ReviewController {
     }
   }
 
-  // 사용 가능한 키워드 목록 API
-  async getAvailableKeywords(req: Request, res: Response) {
-    try {
-      const availableKeywords = GPTPromptService.getAvailableKeywords();
-      const cptedWeights = ScoreCalculator.getCPTEDWeights();
-      const keywordMapping = ScoreCalculator.getKeywordMapping();
-
-      res.json({
-        success: true,
-        data: {
-          availableKeywords,
-          cptedWeights,
-          keywordMapping
-        }
-      });
-      return;
-
-    } catch (error) {
-      console.error('Error in getAvailableKeywords:', error);
-      return res.status(500).json({
-        success: false,
-        error: '키워드 정보 조회 중 오류가 발생했습니다.'
-      });
-    }
-  }
 
   // =========================
   // 리뷰 CRUD 기능들
@@ -527,5 +502,31 @@ export class ReviewController {
     }
 
     return recommendations.length > 0 ? recommendations : ['현재 안전 상태가 양호합니다.'];
+  }
+
+  // 사용 가능한 키워드 목록 조회
+  async getAvailableKeywords(req: Request, res: Response) {
+    try {
+      const availableKeywords = GPTPromptService.getAvailableKeywords();
+      const cptedWeights = ScoreCalculator.getCPTEDWeights();
+      const keywordMapping = ScoreCalculator.getKeywordMapping();
+
+      res.json({
+        success: true,
+        data: {
+          availableKeywords,
+          cptedWeights,
+          keywordMapping
+        }
+      });
+      return;
+
+    } catch (error) {
+      console.error('Error in getAvailableKeywords:', error);
+      return res.status(500).json({
+        success: false,
+        error: '키워드 목록 조회 중 오류가 발생했습니다.'
+      });
+    }
   }
 }

@@ -35,63 +35,68 @@ export class ScoreCalculator {
     activitySupport: 0.10         // 활동성
   } as const;
 
-  // 키워드 → CPTED 원칙 매핑 및 점수
+  // 새로운 키워드 → CPTED 원칙 매핑 및 점수
   private static readonly keywordToCPTED = {
-    // 자연적 감시 관련
-    "밝음": { principle: "naturalSurveillance", score: 30 },
-    "어두움": { principle: "naturalSurveillance", score: -30 },
-    "시야트임": { principle: "naturalSurveillance", score: -20 },
+    // 조도 환경
+    "밤에도 밝아요": { principle: "naturalSurveillance", score: 30 },
+    "골목이 어두워요": { principle: "naturalSurveillance", score: -30 },
+    "사각지대가 많아요": { principle: "naturalSurveillance", score: -25 },
+    "공원•녹지가 잘 보이는 곳이에요": { principle: "naturalSurveillance", score: 20 },
     
-    // 접근통제 관련
-    "한적": { principle: "accessControl", score: -20 },
-    "복잡": { principle: "accessControl", score: 10 },
-    "골목많음": { principle: "accessControl", score: -15 },
+    // 사람•활동
+    "밤에도 사람 왕래가 많아요": { principle: "activitySupport", score: 25 },
+    "주변이 한산해요": { principle: "activitySupport", score: -20 },
+    "상점•편의점이 늦게까지 열어요": { principle: "activitySupport", score: 30 },
+    "배달•택배가 자주 보여요": { principle: "activitySupport", score: 15 },
     
-    // 영역성 강화 관련
-    "어수선": { principle: "territoriality", score: -20 },
-    "깔끔": { principle: "territoriality", score: 25 },
-    "방치됨": { principle: "territoriality", score: -30 },
-    
-    // 활동성 관련
-    "주요상권있음": { principle: "activitySupport", score: 30 },
-    "공원있음": { principle: "activitySupport", score: 20 },
-    
-    // 유지관리 관련
-    "깨끗": { principle: "maintenance", score: 25 },
-    "쓰레기많음": { principle: "maintenance", score: -30 },
-    "방치": { principle: "maintenance", score: -20 },
-    
-    // 감정형 (여러 원칙에 영향)
-    "안심": { 
+    // 치안•안전
+    "순찰차가 자주 돌아요": { 
       principle: "multiple", 
       scores: {
-        naturalSurveillance: 15,
-        accessControl: 15,
-        territoriality: 10
+        naturalSurveillance: 25,
+        accessControl: 20,
+        territoriality: 15
       }
     },
-    "약간불안": { 
+    "비상벨/안심비상을 봤어요": { principle: "naturalSurveillance", score: 25 },
+    "복잡한 골목길이 많아요": { principle: "accessControl", score: -20 },
+    
+    // 생활 편의
+    "편의점•마트가 많아요": { principle: "activitySupport", score: 25 },
+    "카페/음식점이 많아요": { principle: "activitySupport", score: 20 },
+    "늦게까지 여는 가게 있어요": { principle: "activitySupport", score: 30 },
+    "배달•택배가 편리해요": { principle: "activitySupport", score: 15 },
+    
+    // 부정적 키워드
+    "어두운 골목이 많아요": { 
       principle: "multiple", 
       scores: {
-        naturalSurveillance: -5,
-        accessControl: -5,
-        territoriality: -5
+        naturalSurveillance: -30,
+        accessControl: -20,
+        territoriality: -15
       }
     },
-    "불안": { 
+    "유흥가가 많아요": { 
       principle: "multiple", 
       scores: {
-        naturalSurveillance: -15,
-        accessControl: -15,
-        territoriality: -10
+        territoriality: -25,
+        maintenance: -20,
+        accessControl: -15
       }
     },
-    "위험": { 
+    "밤 늦게도 소음이 심해요": { 
+      principle: "multiple", 
+      scores: {
+        territoriality: -20,
+        maintenance: -15
+      }
+    },
+    "밤에 술 취한 사람이 많아요": { 
       principle: "multiple", 
       scores: {
         naturalSurveillance: -25,
-        accessControl: -25,
-        territoriality: -15
+        accessControl: -20,
+        territoriality: -25
       }
     }
   } as const;
