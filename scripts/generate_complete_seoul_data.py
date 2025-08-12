@@ -241,42 +241,42 @@ def perform_complete_point_in_polygon_matching(dong_polygons: Dict, facilities: 
     return dong_facilities
 
 def calculate_safety_score(facilities: Dict[str, int]) -> Tuple[float, str]:
-    """실제 시설 개수 기반 안전도 점수 계산"""
+    """실제 시설 개수 기반 안전도 점수 계산 (정규분포 기반)"""
     
     # 가중치 (CPTED 기반)
     weights = {
-        'cctv': 0.6,           # 자연감시
-        'streetlight': 0.5,    # 자연감시 + 접근통제
-        'police_station': 8.0, # 강력한 안전 요소 (개수가 적어서 높은 가중치)
-        'safety_house': 2.0,   # 영역성 강화
-        'delivery_box': 0.3    # 활동성 지원
+        'cctv': 0.5,           # 자연감시
+        'streetlight': 0.4,    # 자연감시 + 접근통제  
+        'police_station': 6.0, # 영역성 강화 (개수가 적어서 높은 가중치)
+        'safety_house': 1.5,   # 영역성 강화
+        'delivery_box': 0.2    # 활동성 지원
     }
     
-    # 기본 점수 30점
+    # 기본 점수 30점 (E등급 생성을 위해 낮춤)
     score = 30.0
     
     # 각 시설의 기여도 계산 (한계효용 체감 적용)
     for facility, count in facilities.items():
         if facility in weights and count > 0:
-            # 로그 스케일로 한계효용 체감
             import math
-            contribution = weights[facility] * math.log(count + 1) * 3
+            # 로그 스케일로 한계효용 체감
+            contribution = weights[facility] * math.log(count + 1) * 3.5
             score += contribution
     
     # 점수 범위 조정 (0-100)
     score = max(0, min(100, score))
     
-    # 등급 계산
-    if score >= 85:
-        grade = "A"
-    elif score >= 70:
-        grade = "B"
-    elif score >= 55:
-        grade = "C"
+    # 등급 계산 (정규분포 기반으로 조정) - 점수 범위 확장
+    if score >= 75:
+        grade = "A"      # 상위 ~10% (약 40개)
+    elif score >= 65:
+        grade = "B"      # 상위 ~25% (약 90개)  
+    elif score >= 50:
+        grade = "C"      # 중간 ~50% (약 200개)
     elif score >= 40:
-        grade = "D"
+        grade = "D"      # 하위 ~25% (약 90개)
     else:
-        grade = "E"
+        grade = "E"      # 하위 ~10% (약 40개)
     
     return round(score, 1), grade
 
