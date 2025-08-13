@@ -21,6 +21,7 @@ const DATA_PATH = path.join(__dirname, '../data');
 
 let mapData: MapData | null = null;
 let reportData: ReportData | null = null;
+let streetLightData: StreetLight[] = [];
 
 // Middleware
 app.use(helmet());
@@ -50,20 +51,24 @@ app.get('/health', (req: Request, res: Response) => {
 
 async function loadSafetyData(): Promise<void> {
   try {
-    const mapDataPath = path.join(DATA_PATH, 'map_data.json');
-    const reportDataPath = path.join(DATA_PATH, 'report_data.json');
+    const mapDataPath = path.join(DATA_PATH, 'seoul_map_data.json');
+    const reportDataPath = path.join(DATA_PATH, 'seoul_report_data.json');
+    const streetLightDataPath = path.join(DATA_PATH, 'streetlight.json');
     
-    const [mapDataContent, reportDataContent] = await Promise.all([
+    const [mapDataContent, reportDataContent, streetLightDataContent] = await Promise.all([
       fs.readFile(mapDataPath, 'utf8'),
-      fs.readFile(reportDataPath, 'utf8')
+      fs.readFile(reportDataPath, 'utf8'),
+      fs.readFile(streetLightDataPath, 'utf8')
     ]);
     
     mapData = JSON.parse(mapDataContent) as MapData;
     reportData = JSON.parse(reportDataContent) as ReportData;
+    streetLightData = JSON.parse(streetLightDataContent) as StreetLight[];
     
     console.log('✅ Safety data loaded successfully');
     console.log(`📍 Map data: ${mapData.metadata.total_dong} dong`);
     console.log(`📊 Report data loaded`);
+    console.log(`💡 Streetlight data: ${streetLightData.length} lights`);
   } catch (error) {
     console.error('❌ Failed to load safety data:', (error as Error).message);
   }
@@ -142,7 +147,7 @@ app.get('/api/safety/grade/:grade', (req: Request, res: Response) => {
 
 // Streetlight API Routes
 app.get('/api/streetlight/dong/:dongName', (req: Request, res: Response) => {
-  if (!streetLightData) {
+  if (streetLightData.length === 0) {
     return res.status(503).json({ error: 'Streetlight data not loaded' });
   }
   
@@ -160,11 +165,11 @@ app.get('/api/streetlight/dong/:dongName', (req: Request, res: Response) => {
     streetlights: streetlights
   };
   
-  res.json(result);
+  return res.json(result);
 });
 
 app.get('/api/streetlight/district/:districtName', (req: Request, res: Response) => {
-  if (!streetLightData) {
+  if (streetLightData.length === 0) {
     return res.status(503).json({ error: 'Streetlight data not loaded' });
   }
   
@@ -176,7 +181,7 @@ app.get('/api/streetlight/district/:districtName', (req: Request, res: Response)
   }
   
   // 동별로 그룹화
-  const dongGroups = streetlights.reduce((groups: Record<string, StreetLight[]>, light) => {
+  const dongGroups = streetlights.reduce((groups: Record<string, StreetLight[]>, light: StreetLight) => {
     if (!groups[light.dong]) {
       groups[light.dong] = [];
     }
@@ -187,11 +192,11 @@ app.get('/api/streetlight/district/:districtName', (req: Request, res: Response)
   const dongResults: StreetLightByDong[] = Object.entries(dongGroups).map(([dong, lights]) => ({
     dong,
     district: districtName,
-    count: lights.length,
-    streetlights: lights
+    count: (lights as StreetLight[]).length,
+    streetlights: lights as StreetLight[]
   }));
   
-  res.json({
+  return res.json({
     district: districtName,
     total_count: streetlights.length,
     dong_count: dongResults.length,
@@ -200,11 +205,11 @@ app.get('/api/streetlight/district/:districtName', (req: Request, res: Response)
 });
 
 app.get('/api/streetlight/all', (req: Request, res: Response) => {
-  if (!streetLightData) {
+  if (streetLightData.length === 0) {
     return res.status(503).json({ error: 'Streetlight data not loaded' });
   }
   
-  res.json({
+  return res.json({
     total_count: streetLightData.length,
     data: streetLightData
   });
