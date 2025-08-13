@@ -1,6 +1,7 @@
 -- 리뷰 테이블 생성
 CREATE TABLE IF NOT EXISTS reviews (
   id VARCHAR(36) PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   review_text TEXT,
   location VARCHAR(255),
   time_of_day VARCHAR(50),
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_reviews_location ON reviews(location);
+CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_analysis_method ON reviews(analysis_method);
 CREATE INDEX IF NOT EXISTS idx_reviews_safety_level ON reviews ((score_result->>'safetyLevel'));
 CREATE INDEX IF NOT EXISTS idx_reviews_selected_keywords ON reviews USING GIN (selected_keywords);

@@ -9,8 +9,10 @@ import postRoutes from './routes/postRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import restrictedRoutes from './routes/restrictedRoutes';
 import streetlightRoutes from './routes/streetlightRoutes';
+import policyRoutes from './routes/policyRoutes';
 import authRoutes from './routes/auth';
-import { MapData, ReportData, DongData, StreetLight, StreetLightByDong } from './types';
+import { PolicyDataService } from './services/policyDataService';
+import { MapData, ReportData, DongData } from './types';
 
 dotenv.config();
 
@@ -21,7 +23,6 @@ const DATA_PATH = path.join(__dirname, '../data');
 
 let mapData: MapData | null = null;
 let reportData: ReportData | null = null;
-let streetLightData: StreetLight[] = [];
 
 // Middleware
 app.use(helmet());
@@ -53,24 +54,39 @@ async function loadSafetyData(): Promise<void> {
   try {
     const mapDataPath = path.join(DATA_PATH, 'seoul_map_data.json');
     const reportDataPath = path.join(DATA_PATH, 'seoul_report_data.json');
-    const streetLightDataPath = path.join(DATA_PATH, 'streetlight.json');
     
-    const [mapDataContent, reportDataContent, streetLightDataContent] = await Promise.all([
+    const [mapDataContent, reportDataContent] = await Promise.all([
       fs.readFile(mapDataPath, 'utf8'),
-      fs.readFile(reportDataPath, 'utf8'),
-      fs.readFile(streetLightDataPath, 'utf8')
+      fs.readFile(reportDataPath, 'utf8')
     ]);
     
     mapData = JSON.parse(mapDataContent) as MapData;
     reportData = JSON.parse(reportDataContent) as ReportData;
-    streetLightData = JSON.parse(streetLightDataContent) as StreetLight[];
     
     console.log('✅ Safety data loaded successfully');
     console.log(`📍 Map data: ${mapData.metadata.total_dong} dong`);
     console.log(`📊 Report data loaded`);
-    console.log(`💡 Streetlight data: ${streetLightData.length} lights`);
   } catch (error) {
     console.error('❌ Failed to load safety data:', (error as Error).message);
+  }
+}
+
+async function loadPolicyData(): Promise<void> {
+  try {
+    // 데이터베이스 연결 확인
+    const isConnected = await PolicyDataService.checkDatabaseConnection();
+    if (!isConnected) {
+      console.log('⚠️  Database not connected, skipping policy data loading');
+      return;
+    }
+
+    // policies 테이블 존재 확인
+    await PolicyDataService.ensurePolicyTable();
+    
+    // 정책 데이터 로드
+    await PolicyDataService.loadPolicyData();
+  } catch (error) {
+    console.error('❌ Failed to load policy data:', (error as Error).message);
   }
 }
 
@@ -79,6 +95,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/restricted', restrictedRoutes);
 app.use('/api/streetlight', streetlightRoutes);
+app.use('/api/policies', policyRoutes);
 app.use('/auth', authRoutes);
 
 // Safety API Routes
@@ -145,75 +162,6 @@ app.get('/api/safety/grade/:grade', (req: Request, res: Response) => {
   });
 });
 
-// Streetlight API Routes
-app.get('/api/streetlight/dong/:dongName', (req: Request, res: Response) => {
-  if (streetLightData.length === 0) {
-    return res.status(503).json({ error: 'Streetlight data not loaded' });
-  }
-  
-  const dongName = req.params.dongName;
-  const streetlights = streetLightData.filter((light: StreetLight) => light.dong === dongName);
-  
-  if (streetlights.length === 0) {
-    return res.status(404).json({ error: 'No streetlights found for this dong' });
-  }
-  
-  const result: StreetLightByDong = {
-    dong: dongName,
-    district: streetlights[0].district,
-    count: streetlights.length,
-    streetlights: streetlights
-  };
-  
-  return res.json(result);
-});
-
-app.get('/api/streetlight/district/:districtName', (req: Request, res: Response) => {
-  if (streetLightData.length === 0) {
-    return res.status(503).json({ error: 'Streetlight data not loaded' });
-  }
-  
-  const districtName = req.params.districtName;
-  const streetlights = streetLightData.filter((light: StreetLight) => light.district === districtName);
-  
-  if (streetlights.length === 0) {
-    return res.status(404).json({ error: 'No streetlights found for this district' });
-  }
-  
-  // 동별로 그룹화
-  const dongGroups = streetlights.reduce((groups: Record<string, StreetLight[]>, light: StreetLight) => {
-    if (!groups[light.dong]) {
-      groups[light.dong] = [];
-    }
-    groups[light.dong].push(light);
-    return groups;
-  }, {});
-  
-  const dongResults: StreetLightByDong[] = Object.entries(dongGroups).map(([dong, lights]) => ({
-    dong,
-    district: districtName,
-    count: (lights as StreetLight[]).length,
-    streetlights: lights as StreetLight[]
-  }));
-  
-  return res.json({
-    district: districtName,
-    total_count: streetlights.length,
-    dong_count: dongResults.length,
-    data: dongResults
-  });
-});
-
-app.get('/api/streetlight/all', (req: Request, res: Response) => {
-  if (streetLightData.length === 0) {
-    return res.status(503).json({ error: 'Streetlight data not loaded' });
-  }
-  
-  return res.json({
-    total_count: streetLightData.length,
-    data: streetLightData
-  });
-});
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
@@ -234,16 +182,20 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 
 async function startServer(): Promise<void> {
   await loadSafetyData();
+  await loadPolicyData();
   
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📡 Available safety endpoints:`);
+    console.log(`📡 Available endpoints:`);
     console.log(`   GET /api/safety/map - Full map data`);
     console.log(`   GET /api/safety/report - Detailed report`);
     console.log(`   GET /api/safety/dong/:dongCode - Specific dong data`);
     console.log(`   GET /api/safety/district/:district - District data`);
     console.log(`   GET /api/safety/grade/:grade - Filter by safety grade`);
+    console.log(`   GET /api/policies - All policies`);
+    console.log(`   GET /api/policies/:id - Specific policy`);
+    console.log(`   GET /api/policies?category=여성 - Filter by category`);
   });
 }
 
