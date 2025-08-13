@@ -11,6 +11,7 @@ import restrictedRoutes from './routes/restrictedRoutes';
 import streetlightRoutes from './routes/streetlightRoutes';
 import policyRoutes from './routes/policyRoutes';
 import authRoutes from './routes/auth';
+import notificationRoutes from './routes/notificationRoutes';
 import { PolicyDataService } from './services/policyDataService';
 import { MapData, ReportData, DongData } from './types';
 
@@ -97,6 +98,7 @@ app.use('/api/restricted', restrictedRoutes);
 app.use('/api/streetlight', streetlightRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/auth', authRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Safety API Routes
 app.get('/api/safety/map', (req: Request, res: Response) => {
