@@ -69,7 +69,7 @@ router.get('/district/:districtName', async (req: Request, res: Response) => {
     }
     
     // 동별로 그룹화
-    const dongGroups = streetlights.reduce((groups: Record<string, StreetLight[]>, light) => {
+    const dongGroups = streetlights.reduce((groups: Record<string, StreetLight[]>, light: StreetLight) => {
       if (!groups[light.dong]) {
         groups[light.dong] = [];
       }
@@ -80,8 +80,8 @@ router.get('/district/:districtName', async (req: Request, res: Response) => {
     const dongResults: StreetLightByDong[] = Object.entries(dongGroups).map(([dong, lights]) => ({
       dong,
       district: districtName,
-      count: lights.length,
-      streetlights: lights
+      count: (lights as StreetLight[]).length,
+      streetlights: lights as StreetLight[]
     }));
     
     return res.json({

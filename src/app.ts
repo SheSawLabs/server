@@ -12,7 +12,7 @@ import streetlightRoutes from './routes/streetlightRoutes';
 import policyRoutes from './routes/policyRoutes';
 import authRoutes from './routes/auth';
 import { PolicyDataService } from './services/policyDataService';
-import { MapData, ReportData, DongData, StreetLight, StreetLightByDong } from './types';
+import { MapData, ReportData, DongData } from './types';
 
 dotenv.config();
 
@@ -52,8 +52,8 @@ app.get('/health', (req: Request, res: Response) => {
 
 async function loadSafetyData(): Promise<void> {
   try {
-    const mapDataPath = path.join(DATA_PATH, 'map_data.json');
-    const reportDataPath = path.join(DATA_PATH, 'report_data.json');
+    const mapDataPath = path.join(DATA_PATH, 'seoul_map_data.json');
+    const reportDataPath = path.join(DATA_PATH, 'seoul_report_data.json');
     
     const [mapDataContent, reportDataContent] = await Promise.all([
       fs.readFile(mapDataPath, 'utf8'),
@@ -161,6 +161,7 @@ app.get('/api/safety/grade/:grade', (req: Request, res: Response) => {
     data: dongs
   });
 });
+
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
