@@ -53,9 +53,14 @@ router.delete('/:id', (req, res) => {
   reviewController.deleteReview(req, res);
 });
 
-// 통계 정보 조회
+// 전체 통계 정보 조회
 router.get('/stats/summary', (req, res) => {
   reviewController.getReviewStats(req, res);
+});
+
+// 동별 통계 조회
+router.get('/stats/location', (req, res) => {
+  reviewController.getLocationStats(req, res);
 });
 
 export default router;

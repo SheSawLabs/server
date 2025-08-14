@@ -305,6 +305,71 @@ export class ReviewService {
     }
   }
 
+  // 동별 통계 조회
+  static async getLocationStats(location: string): Promise<{
+    location: string;
+    averageRating: number;
+    totalReviews: number;
+    topKeywords: { keyword: string; count: number; percentage: number }[];
+  }> {
+    try {
+      // 해당 동의 리뷰들 조회
+      const reviewQuery = `
+        SELECT rating, selected_keywords 
+        FROM reviews 
+        WHERE location ILIKE $1
+      `;
+      const reviewResult = await pool.query(reviewQuery, [`%${location}%`]);
+      
+      const totalReviews = reviewResult.rows.length;
+      if (totalReviews === 0) {
+        return {
+          location,
+          averageRating: 0,
+          totalReviews: 0,
+          topKeywords: []
+        };
+      }
+
+      // 평균 rating 계산
+      const ratings = reviewResult.rows.map(row => row.rating).filter(r => r !== null);
+      const averageRating = ratings.length > 0 
+        ? Math.round((ratings.reduce((sum, r) => sum + r, 0) / ratings.length) * 10) / 10 
+        : 0;
+
+      // 키워드 통계 계산
+      const keywordCounts: { [key: string]: number } = {};
+      reviewResult.rows.forEach(row => {
+        const selectedKeywords = row.selected_keywords || [];
+        selectedKeywords.forEach((item: any) => {
+          if (item.keyword) {
+            keywordCounts[item.keyword] = (keywordCounts[item.keyword] || 0) + 1;
+          }
+        });
+      });
+
+      // 상위 키워드 3개 선택
+      const topKeywords = Object.entries(keywordCounts)
+        .map(([keyword, count]) => ({
+          keyword,
+          count,
+          percentage: Math.round((count / totalReviews) * 100)
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      return {
+        location,
+        averageRating,
+        totalReviews,
+        topKeywords
+      };
+    } catch (error) {
+      console.error('Error getting location stats:', error);
+      throw new Error('동별 통계 조회 중 오류가 발생했습니다.');
+    }
+  }
+
   // 키워드 선택 통계 (몇 명이 각 키워드를 선택했는지)
   static async getKeywordSelectionStats(): Promise<{
     totalUsers: number;
