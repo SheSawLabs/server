@@ -12,6 +12,9 @@ import streetlightRoutes from './routes/streetlightRoutes';
 import policyRoutes from './routes/policyRoutes';
 import authRoutes from './routes/auth';
 import notificationRoutes from './routes/notificationRoutes';
+import settlementRoutes from './routes/settlementRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import testRoutes from './routes/testRoutes';
 import { PolicyDataService } from './services/policyDataService';
 import { MapData, ReportData, DongData } from './types';
 
@@ -99,6 +102,9 @@ app.use('/api/streetlight', streetlightRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/settlements', settlementRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/test', testRoutes);
 
 // Safety API Routes
 app.get('/api/safety/map', (req: Request, res: Response) => {
