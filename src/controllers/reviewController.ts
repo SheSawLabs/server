@@ -299,7 +299,7 @@ export class ReviewController {
         cursor, 
         location, 
         analysisMethod, 
-        safetyLevel 
+        safetyLevel
       } = req.query;
 
       const limitNum = parseInt(limit as string);
@@ -502,6 +502,35 @@ export class ReviewController {
     }
 
     return recommendations.length > 0 ? recommendations : ['현재 안전 상태가 양호합니다.'];
+  }
+
+  // 동별 통계 조회
+  async getLocationStats(req: Request, res: Response) {
+    try {
+      const { location } = req.query;
+
+      if (!location || typeof location !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: '지역 정보가 필요합니다.'
+        });
+      }
+
+      const stats = await ReviewService.getLocationStats(location);
+
+      res.json({
+        success: true,
+        data: stats
+      });
+      return;
+
+    } catch (error) {
+      console.error('Error in getLocationStats:', error);
+      return res.status(500).json({
+        success: false,
+        error: '동별 통계 조회 중 오류가 발생했습니다.'
+      });
+    }
   }
 
   // 사용 가능한 키워드 목록 조회
