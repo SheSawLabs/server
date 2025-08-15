@@ -191,15 +191,19 @@ export class ReviewController {
     try {
       const { reviewText, selectedKeywords, location, timeOfDay, rating } = req.body;
 
-      if (!reviewText || typeof reviewText !== 'string') {
+      // reviewText가 있는 경우에만 유효성 검사
+      if (reviewText && typeof reviewText !== 'string') {
         return res.status(400).json({
           success: false,
-          error: '리뷰 텍스트가 필요합니다.'
+          error: '리뷰 텍스트는 문자열이어야 합니다.'
         });
       }
 
-      // 1. GPT 키워드 추천
-      const gptAnalysis = await this.aiService.analyzeReview(reviewText);
+      // 1. GPT 키워드 추천 (reviewText가 있는 경우에만)
+      let gptAnalysis = null;
+      if (reviewText && reviewText.trim()) {
+        gptAnalysis = await this.aiService.analyzeReview(reviewText);
+      }
 
       // 2. 점수 계산 (키워드가 선택된 경우)
       let scoreResult = null;
@@ -225,7 +229,7 @@ export class ReviewController {
           timeOfDay,
           rating,
           selectedKeywords: finalKeywords,
-          recommendedKeywords: gptAnalysis.recommendedKeywords,
+          recommendedKeywords: gptAnalysis?.recommendedKeywords || [],
           scoreResult: scoreResult ? {
             totalScore: scoreResult.totalScore,
             categoryScores: Object.entries(scoreResult.categoryScores).reduce((acc, [key, value]) => {
@@ -235,11 +239,11 @@ export class ReviewController {
             safetyLevel: this.getScoreLevel(scoreResult.totalScore),
             recommendations: this.getRecommendations(scoreResult)
           } : undefined,
-          contextAnalysis: {
+          contextAnalysis: gptAnalysis ? {
             emotionalSummary: gptAnalysis.emotionalSummary,
             situationSummary: gptAnalysis.situationSummary
-          },
-          analysisMethod: 'gpt'
+          } : undefined,
+          analysisMethod: gptAnalysis ? 'gpt' : 'manual'
         });
 
         res.json({
@@ -247,11 +251,11 @@ export class ReviewController {
           data: {
             reviewId: savedReview.id,
             reviewText,
-            gptAnalysis: {
+            gptAnalysis: gptAnalysis ? {
               recommendedKeywords: gptAnalysis.recommendedKeywords,
               emotionalSummary: gptAnalysis.emotionalSummary,
               situationSummary: gptAnalysis.situationSummary
-            },
+            } : null,
             scoreResult,
             availableKeywords: GPTPromptService.getAvailableKeywords()
           }
@@ -264,11 +268,11 @@ export class ReviewController {
           success: true,
           data: {
             reviewText,
-            gptAnalysis: {
+            gptAnalysis: gptAnalysis ? {
               recommendedKeywords: gptAnalysis.recommendedKeywords,
               emotionalSummary: gptAnalysis.emotionalSummary,
               situationSummary: gptAnalysis.situationSummary
-            },
+            } : null,
             scoreResult,
             availableKeywords: GPTPromptService.getAvailableKeywords(),
             warning: 'DB 저장에 실패했지만 분석은 완료되었습니다.'
