@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { TossPaymentService, TossPaymentConfirmRequest } from '../services/tossPaymentService';
+import { TossPaymentService, TossPaymentConfirmRequest, TossPaymentRequest } from '../services/tossPaymentService';
 import { SettlementModel } from '../models/settlement';
+import { pool } from '../config/database';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -13,6 +14,80 @@ export interface AuthenticatedRequest extends Request {
     exp: number;
   };
 }
+
+/**
+ * 정산 결제 시작
+ */
+export const startSettlementPayment = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: '인증이 필요합니다.'
+      });
+    }
+
+    const { settlementId } = req.body;
+
+    if (!settlementId) {
+      return res.status(400).json({
+        success: false,
+        message: '정산 ID가 필요합니다.'
+      });
+    }
+
+    const userId = parseInt(req.user!.user_id);
+
+    // 정산 요청 조회
+    const settlement = await SettlementModel.getSettlementRequestWithParticipants(settlementId);
+    if (!settlement) {
+      return res.status(404).json({
+        success: false,
+        message: '정산 요청을 찾을 수 없습니다.'
+      });
+    }
+
+    // 사용자의 정산 참여 확인
+    const participation = settlement.participants.find(p => p.user_id === userId);
+    if (!participation) {
+      return res.status(404).json({
+        success: false,
+        message: '정산 참여 정보를 찾을 수 없습니다.'
+      });
+    }
+
+    // 이미 결제된 경우 확인
+    if (participation.payment_status === 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: '이미 결제가 완료되었습니다.'
+      });
+    }
+
+    // 기존 orderId가 있으면 재사용, 없으면 새로 생성
+    let orderId = participation.toss_order_id;
+    if (!orderId) {
+      orderId = `settlement_${settlementId}_${userId}_${Date.now()}`;
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        orderId: orderId,
+        amount: participation.amount,
+        orderName: `정산 결제 - ${settlementId.substring(0, 8)}`,
+        settlementId: settlementId
+      }
+    });
+
+  } catch (error) {
+    console.error('정산 결제 시작 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '결제 시작에 실패했습니다.'
+    });
+  }
+};
 
 /**
  * 정산 결제 승인
@@ -268,6 +343,147 @@ export const getPaymentInfo = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: error.message || '결제 정보 조회에 실패했습니다.'
+    });
+  }
+};
+
+/**
+ * 정산 결제 상태 조회
+ */
+export const getSettlementPaymentStatus = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: '인증이 필요합니다.'
+      });
+    }
+
+    const { orderId, paymentKey } = req.query;
+
+    if (!orderId || !paymentKey) {
+      return res.status(400).json({
+        success: false,
+        message: 'orderId와 paymentKey가 모두 필요합니다.'
+      });
+    }
+
+    // orderId에서 정산 정보 추출 (settlement_${settlementId}_${userId}_${timestamp})
+    const orderIdParts = (orderId as string).split('_');
+    if (orderIdParts.length !== 4 || orderIdParts[0] !== 'settlement') {
+      return res.status(400).json({
+        success: false,
+        message: '유효하지 않은 주문 ID입니다.'
+      });
+    }
+
+    const settlementId = orderIdParts[1];
+    const userId = parseInt(orderIdParts[2]);
+
+    if (userId !== parseInt(req.user.user_id)) {
+      return res.status(403).json({
+        success: false,
+        message: '본인의 결제만 조회할 수 있습니다.'
+      });
+    }
+
+    // DB에서 정산 정보 조회
+    const settlement = await SettlementModel.getSettlementRequestWithParticipants(settlementId);
+    if (!settlement) {
+      return res.status(404).json({
+        success: false,
+        message: '정산 요청을 찾을 수 없습니다.'
+      });
+    }
+
+    const participant = settlement.participants.find(p => p.user_id === userId);
+    if (!participant) {
+      return res.status(403).json({
+        success: false,
+        message: '해당 정산에 참여하지 않았습니다.'
+      });
+    }
+
+    // DB 상태
+    console.log('=== DB 결제 상태 ===');
+    console.log('orderId:', orderId);
+    console.log('participant.id:', participant.id);
+    console.log('DB payment_status:', participant.payment_status);
+    console.log('DB toss_payment_key:', participant.toss_payment_key);
+    console.log('DB paid_at:', participant.paid_at);
+
+    let tossPaymentData = null;
+    
+    // 토스 API로 실제 상태 확인
+    try {
+      const tossService = new TossPaymentService();
+      tossPaymentData = await tossService.getPayment(paymentKey as string);
+        
+        console.log('=== 토스 API 응답 ===');
+        console.log('전체 응답:', JSON.stringify(tossPaymentData, null, 2));
+        console.log('토스 status:', tossPaymentData.status);
+        console.log('토스 method:', tossPaymentData.method);
+        console.log('토스 approvedAt:', tossPaymentData.approvedAt);
+        console.log('토스 amount:', tossPaymentData.totalAmount);
+        
+    } catch (error) {
+      console.log('=== 토스 API 에러 ===');
+      console.log('에러:', error);
+    }
+
+    // DB 상태와 토스 상태 동기화
+    if (tossPaymentData) {
+      const tossStatus = tossPaymentData.status;
+      const dbStatus = participant.payment_status;
+      
+      console.log('=== 상태 비교 ===');
+      console.log('DB 상태:', dbStatus);
+      console.log('토스 상태:', tossStatus);
+
+      // 토스에서 완료되었는데 DB가 pending인 경우 동기화
+      if (tossStatus === 'DONE' && dbStatus === 'pending') {
+        try {
+          const updateQuery = `
+            UPDATE settlement_participants 
+            SET payment_status = 'paid', 
+                toss_payment_key = $1,
+                paid_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE settlement_request_id = $2 AND user_id = $3
+          `;
+          
+          await pool.query(updateQuery, [paymentKey, settlementId, userId]);
+          console.log('✅ DB 상태를 paid로 동기화 완료');
+          
+          // participant 객체도 업데이트
+          participant.payment_status = 'paid';
+          participant.toss_payment_key = paymentKey as string;
+          participant.paid_at = new Date();
+          
+        } catch (syncError) {
+          console.error('❌ DB 동기화 실패:', syncError);
+        }
+      }
+    }
+
+    // 응답 반환
+    res.json({
+      success: true,
+      data: {
+        orderId: orderId,
+        paymentStatus: participant.payment_status, // 최종 상태 (동기화 후)
+        amount: participant.amount,
+        paidAt: participant.paid_at,
+        settlementId: settlementId,
+        isPaymentCompleted: participant.payment_status === 'paid'
+      }
+    });
+
+  } catch (error) {
+    console.error('결제 상태 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '결제 상태 조회에 실패했습니다.'
     });
   }
 };

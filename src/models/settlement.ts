@@ -1,4 +1,5 @@
 import { pool } from '../config/database';
+import { TossPaymentService } from '../services/tossPaymentService';
 
 export interface SettlementRequest {
   id: string;
@@ -72,16 +73,20 @@ export class SettlementModel {
       // 정산 참여자들 생성
       const participants: SettlementParticipant[] = [];
       for (const participant of data.participants) {
+        // toss_order_id 미리 생성
+        const tossOrderId = TossPaymentService.generateSettlementOrderId(settlementRequest.id, participant.user_id);
+        
         const participantQuery = `
-          INSERT INTO settlement_participants (settlement_request_id, user_id, amount)
-          VALUES ($1, $2, $3)
+          INSERT INTO settlement_participants (settlement_request_id, user_id, amount, toss_order_id)
+          VALUES ($1, $2, $3, $4)
           RETURNING *
         `;
         
         const participantResult = await client.query(participantQuery, [
           settlementRequest.id,
           participant.user_id,
-          participant.amount
+          participant.amount,
+          tossOrderId
         ]);
         
         participants.push(this.mapDbRowToParticipant(participantResult.rows[0]));
@@ -293,4 +298,5 @@ export class SettlementModel {
       updated_at: new Date(row.updated_at)
     };
   }
+
 }

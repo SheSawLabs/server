@@ -159,6 +159,31 @@ export class TossPaymentService {
   }
   
   /**
+   * 결제 시작 (결제 페이지 URL 반환)
+   */
+  async createPayment(paymentRequest: TossPaymentRequest): Promise<{ checkoutUrl: string }> {
+    try {
+      const headers = {
+        'Authorization': `Basic ${Buffer.from(this.secretKey + ':').toString('base64')}`,
+        'Content-Type': 'application/json'
+      };
+      
+      const response = await axios.post(
+        `${this.baseUrl}/v1/payments`,
+        paymentRequest,
+        { headers }
+      );
+      
+      return {
+        checkoutUrl: response.data.checkout.url
+      };
+    } catch (error: any) {
+      console.error('토스페이먼츠 결제 생성 실패:', error.response?.data || error.message);
+      throw new Error('결제 생성에 실패했습니다.');
+    }
+  }
+
+  /**
    * 주문 ID 생성 (정산 전용)
    */
   static generateSettlementOrderId(settlementId: string, userId: number): string {
