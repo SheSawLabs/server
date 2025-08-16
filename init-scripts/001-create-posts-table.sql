@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS posts (
     status VARCHAR(20) DEFAULT 'recruiting' CHECK (status IN ('recruiting', 'active', 'full')),
     
     -- Common fields
+    views INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     
@@ -43,3 +44,4 @@ CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at);
 CREATE INDEX IF NOT EXISTS idx_posts_date ON posts(date) WHERE category != '일반';
 CREATE INDEX IF NOT EXISTS idx_posts_location ON posts(location) WHERE category != '일반';
 CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status) WHERE category != '일반';
+CREATE INDEX IF NOT EXISTS idx_posts_views ON posts(views);
