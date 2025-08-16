@@ -154,6 +154,41 @@ export class SettlementModel {
       throw new Error('정산 요청 목록 조회에 실패했습니다.');
     }
   }
+
+  /**
+   * 특정 게시물의 정산 상세 정보 조회 (참여자 포함)
+   */
+  static async getSettlementByPostId(postId: string): Promise<SettlementRequestWithParticipants | null> {
+    try {
+      const settlementQuery = `
+        SELECT * FROM settlement_requests 
+        WHERE post_id = $1 
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      const settlementResult = await pool.query(settlementQuery, [postId]);
+      
+      if (settlementResult.rows.length === 0) {
+        return null;
+      }
+      
+      const settlement = settlementResult.rows[0];
+      
+      const participantsQuery = `
+        SELECT * FROM settlement_participants 
+        WHERE settlement_request_id = $1
+      `;
+      const participantsResult = await pool.query(participantsQuery, [settlement.id]);
+      
+      return {
+        ...this.mapDbRowToSettlementRequest(settlement),
+        participants: participantsResult.rows.map(row => this.mapDbRowToParticipant(row))
+      };
+    } catch (error) {
+      console.error('게시물 정산 상세 조회 실패:', error);
+      throw new Error('정산 상세 조회에 실패했습니다.');
+    }
+  }
   
   /**
    * 사용자의 정산 참여 목록 조회 (결제해야 할 목록)
