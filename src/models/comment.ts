@@ -39,9 +39,13 @@ export class CommentModel {
   // Get comments by post ID
   static async getByPostId(postId: string): Promise<Comment[]> {
     const query = `
-      SELECT * FROM comments 
-      WHERE post_id = $1 
-      ORDER BY created_at ASC
+      SELECT c.*,
+             u.nickname as author_nickname,
+             u.profile_image as author_profile_image
+      FROM comments c
+      LEFT JOIN users u ON c.author_id = u.id
+      WHERE c.post_id = $1 
+      ORDER BY c.created_at ASC
     `;
     
     const result = await pool.query(query, [postId]);
