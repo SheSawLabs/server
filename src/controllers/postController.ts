@@ -398,3 +398,44 @@ export const getParticipants = async (req: Request, res: Response): Promise<void
     });
   }
 };
+
+export const getPostSettlement = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    // Check if post exists
+    const post = await PostModel.findById(id);
+    if (!post) {
+      res.status(404).json({
+        success: false,
+        message: 'Post not found'
+      });
+      return;
+    }
+
+    // Import SettlementModel dynamically to avoid circular dependency
+    const { SettlementModel } = await import('../models/settlement');
+    
+    // Get settlement for this post
+    const settlement = await SettlementModel.getSettlementByPostId(id);
+    
+    if (!settlement) {
+      res.status(404).json({
+        success: false,
+        message: '이 게시글에 대한 정산 요청이 없습니다.'
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: settlement
+    });
+  } catch (error) {
+    console.error('Error fetching post settlement:', error);
+    res.status(500).json({
+      success: false,
+      message: '정산 정보 조회에 실패했습니다.'
+    });
+  }
+};
