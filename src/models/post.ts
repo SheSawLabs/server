@@ -70,7 +70,14 @@ export class PostModel {
       await pool.query('UPDATE posts SET views = views + 1 WHERE id = $1', [id]);
     }
     
-    const query = 'SELECT * FROM posts WHERE id = $1';
+    const query = `
+      SELECT p.*,
+             u.nickname as author_nickname,
+             u.profile_image as author_profile_image
+      FROM posts p
+      LEFT JOIN users u ON p.author_id = u.id
+      WHERE p.id = $1
+    `;
     const result = await pool.query(query, [id]);
     return result.rows[0] || null;
   }
@@ -111,8 +118,11 @@ export class PostModel {
              COALESCE(like_count.count, 0) as likes_count,
              COALESCE(comment_count.count, 0) as comments_count,
              COALESCE(p.views, 0) as views_count,
-             CASE WHEN user_likes.user_id IS NOT NULL THEN 'true' ELSE 'false' END as is_liked
+             CASE WHEN user_likes.user_id IS NOT NULL THEN 'true' ELSE 'false' END as is_liked,
+             u.nickname as author_nickname,
+             u.profile_image as author_profile_image
       FROM posts p
+      LEFT JOIN users u ON p.author_id = u.id
       LEFT JOIN (
         SELECT post_id, COUNT(*) as count 
         FROM likes 

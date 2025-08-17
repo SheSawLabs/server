@@ -384,7 +384,8 @@ export const getParticipants = async (req: Request, res: Response): Promise<void
           title: post.title,
           category: post.category,
           location: post.location,
-          date: post.date
+          date: post.date,
+          author_id: post.author_id
         },
         participants: participants,
         total_participants: participants.length
