@@ -45,7 +45,7 @@ export class ParticipantModel {
   // Get participants by post ID
   static async getByPostId(postId: string): Promise<Participant[]> {
     const query = `
-      SELECT mp.*, u.nickname as name
+      SELECT mp.*, u.nickname as name, u.profile_image
       FROM meetup_participants mp
       LEFT JOIN users u ON mp.user_id = u.id
       WHERE mp.post_id = $1 
@@ -53,6 +53,7 @@ export class ParticipantModel {
     `;
     
     const result = await pool.query(query, [postId]);
+    console.log('🔍 [PARTICIPANT MODEL] SQL 결과:', result.rows);
     return result.rows;
   }
 

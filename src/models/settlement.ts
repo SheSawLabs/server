@@ -23,6 +23,8 @@ export interface SettlementParticipant {
   paid_at?: Date;
   created_at: Date;
   updated_at: Date;
+  nickname?: string;
+  profile_image?: string;
 }
 
 export interface CreateSettlementRequest {
@@ -180,7 +182,7 @@ export class SettlementModel {
       const settlement = settlementResult.rows[0];
       
       const participantsQuery = `
-        SELECT sp.*, u.nickname as user_name
+        SELECT sp.*, u.nickname as user_name, u.profile_image
         FROM settlement_participants sp
         LEFT JOIN users u ON sp.user_id = u.id
         WHERE sp.settlement_request_id = $1
@@ -344,7 +346,7 @@ export class SettlementModel {
       paid_at: row.paid_at ? new Date(row.paid_at) : undefined,
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
-      nickname: row.user_name
+      nickname: row.user_name,
     };
   }
 
