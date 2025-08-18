@@ -45,7 +45,7 @@ export class ParticipantModel {
   // Get participants by post ID
   static async getByPostId(postId: string): Promise<Participant[]> {
     const query = `
-      SELECT mp.*, u.nickname, u.profile_image 
+      SELECT mp.*, u.nickname as name, u.profile_image
       FROM meetup_participants mp
       LEFT JOIN users u ON mp.user_id = u.id
       WHERE mp.post_id = $1 

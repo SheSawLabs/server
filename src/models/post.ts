@@ -71,7 +71,7 @@ export class PostModel {
     }
     
     const query = `
-      SELECT p.*,
+      SELECT p.*, u.nickname as author_name,
              u.nickname as author_nickname,
              u.profile_image as author_profile_image
       FROM posts p
@@ -86,10 +86,12 @@ export class PostModel {
   static async findByCategory(category: PostCategory): Promise<Post[]> {
     const query = `
       SELECT p.*,
+             u.nickname as author_name,
              COALESCE(like_count.count, 0) as likes_count,
              COALESCE(comment_count.count, 0) as comments_count,
              COALESCE(p.views, 0) as views_count
       FROM posts p
+      LEFT JOIN users u ON p.author_id = u.id
       LEFT JOIN (
         SELECT post_id, COUNT(*) as count 
         FROM likes 
@@ -109,12 +111,14 @@ export class PostModel {
 
   // Find all posts with stats and user like status
   static async findAll(category?: PostCategory, userId?: string): Promise<Post[]> {
+    console.log('🔍 findAll called with category:', category, 'userId:', userId);
     const userLikeSubquery = userId 
       ? `SELECT post_id, user_id FROM likes WHERE user_id = ${parseInt(userId)}`
       : `SELECT post_id, user_id FROM likes WHERE 1=0`;
     
     let query = `
       SELECT p.*,
+             u.nickname as author_name,
              COALESCE(like_count.count, 0) as likes_count,
              COALESCE(comment_count.count, 0) as comments_count,
              COALESCE(p.views, 0) as views_count,
@@ -147,12 +151,19 @@ export class PostModel {
     query += ' ORDER BY p.created_at DESC';
     
     const result = await pool.query(query, values);
+    console.log('POST QUERY RESULT:', result.rows[0]); // 디버깅용
     return result.rows;
   }
 
   // Find meetups (all categories except '일반')
   static async findMeetups(): Promise<Post[]> {
-    const query = 'SELECT * FROM posts WHERE category != $1 ORDER BY created_at DESC';
+    const query = `
+      SELECT p.*, u.name as author_name
+      FROM posts p
+      LEFT JOIN users u ON p.author_id = u.id
+      WHERE p.category != $1 
+      ORDER BY p.created_at DESC
+    `;
     const result = await pool.query(query, ['일반']);
     return result.rows;
   }
