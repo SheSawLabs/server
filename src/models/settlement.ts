@@ -37,6 +37,8 @@ export interface CreateSettlementRequest {
 
 export interface SettlementRequestWithParticipants extends SettlementRequest {
   participants: SettlementParticipant[];
+  post_title?: string;
+  post_category?: string;
 }
 
 export class SettlementModel {
@@ -122,7 +124,10 @@ export class SettlementModel {
       }
       
       const participantsQuery = `
-        SELECT * FROM settlement_participants WHERE settlement_request_id = $1
+        SELECT sp.*, u.nickname as user_name
+        FROM settlement_participants sp
+        LEFT JOIN users u ON sp.user_id = u.id
+        WHERE sp.settlement_request_id = $1
       `;
       const participantsResult = await pool.query(participantsQuery, [settlementId]);
       
@@ -175,8 +180,10 @@ export class SettlementModel {
       const settlement = settlementResult.rows[0];
       
       const participantsQuery = `
-        SELECT * FROM settlement_participants 
-        WHERE settlement_request_id = $1
+        SELECT sp.*, u.nickname as user_name
+        FROM settlement_participants sp
+        LEFT JOIN users u ON sp.user_id = u.id
+        WHERE sp.settlement_request_id = $1
       `;
       const participantsResult = await pool.query(participantsQuery, [settlement.id]);
       
@@ -196,9 +203,11 @@ export class SettlementModel {
   static async getSettlementParticipationsByUserId(userId: number): Promise<SettlementRequestWithParticipants[]> {
     try {
       const query = `
-        SELECT sr.*, sp.amount as participant_amount, sp.payment_status, sp.toss_payment_key, sp.toss_order_id, sp.paid_at
+        SELECT sr.*, sp.amount as participant_amount, sp.payment_status, sp.toss_payment_key, sp.toss_order_id, sp.paid_at,
+               p.title as post_title, p.category as post_category
         FROM settlement_requests sr
         JOIN settlement_participants sp ON sr.id = sp.settlement_request_id
+        LEFT JOIN posts p ON sr.post_id = p.id
         WHERE sp.user_id = $1
         ORDER BY sr.created_at DESC
       `;
@@ -217,6 +226,10 @@ export class SettlementModel {
         }
         
         const settlement = settlementMap.get(settlementId)!;
+        // 포스트 정보 추가
+        settlement.post_title = row.post_title;
+        settlement.post_category = row.post_category;
+        
         settlement.participants.push({
           id: row.settlement_participant_id,
           settlement_request_id: settlementId,
@@ -319,7 +332,7 @@ export class SettlementModel {
   /**
    * DB 행을 SettlementParticipant 객체로 변환
    */
-  private static mapDbRowToParticipant(row: any): SettlementParticipant {
+  private static mapDbRowToParticipant(row: any): SettlementParticipant & { nickname?: string } {
     return {
       id: row.id,
       settlement_request_id: row.settlement_request_id,
@@ -330,7 +343,8 @@ export class SettlementModel {
       toss_order_id: row.toss_order_id,
       paid_at: row.paid_at ? new Date(row.paid_at) : undefined,
       created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at)
+      updated_at: new Date(row.updated_at),
+      nickname: row.user_name
     };
   }
 
