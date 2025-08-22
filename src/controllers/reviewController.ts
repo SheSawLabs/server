@@ -56,7 +56,7 @@ export class ReviewController {
   // 점수 계산 API
   async calculateScore(req: Request, res: Response) {
     try {
-      const { selectedKeywords, reviewText } = req.body;
+      const { selectedKeywords, reviewText, rating } = req.body;
 
       if (!selectedKeywords || !Array.isArray(selectedKeywords)) {
         return res.status(400).json({
@@ -79,7 +79,7 @@ export class ReviewController {
         });
       }
 
-      const scoreResult = ScoreCalculator.calculateScore(validKeywords);
+      const scoreResult = ScoreCalculator.calculateScore(validKeywords, rating || 3);
 
       res.json({
         success: true,
@@ -191,6 +191,9 @@ export class ReviewController {
     try {
       const { reviewText, selectedKeywords, location, timeOfDay, rating } = req.body;
 
+      // 인증된 사용자 정보 가져오기
+      const userId = req.user?.user_id;
+
       // reviewText가 있는 경우에만 유효성 검사
       if (reviewText && typeof reviewText !== 'string') {
         return res.status(400).json({
@@ -217,13 +220,14 @@ export class ReviewController {
         });
 
         if (finalKeywords.length > 0) {
-          scoreResult = ScoreCalculator.calculateScore(finalKeywords);
+          scoreResult = ScoreCalculator.calculateScore(finalKeywords, rating || 3);
         }
       }
 
       // 3. 리뷰 저장
       try {
         const savedReview = await ReviewService.createReview({
+          user_id: userId ? Number(userId) : undefined,
           reviewText,
           location,
           timeOfDay,

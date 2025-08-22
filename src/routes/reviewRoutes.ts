@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ReviewController } from '../controllers/reviewController';
+import { optionalAuth } from '../middleware/auth';
 
 const router = Router();
 const reviewController = new ReviewController();
@@ -20,7 +21,7 @@ router.post('/analyze-keywords-rating', (req, res) => {
 });
 
 // 통합 분석 (추천 + 점수계산)
-router.post('/analyze-complete', (req, res) => {
+router.post('/analyze-complete', optionalAuth, (req, res) => {
   reviewController.analyzeReviewComplete(req, res);
 });
 
@@ -34,7 +35,7 @@ router.get('/keywords', (req, res) => {
 // =========================
 
 // 리뷰 목록 조회 (무한 스크롤)
-router.get('/list', (req, res) => {
+router.get('/list', optionalAuth, (req, res) => {
   reviewController.getReviews(req, res);
 });
 
