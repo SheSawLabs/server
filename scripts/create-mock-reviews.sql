@@ -1,0 +1,275 @@
+-- Mock Reviews 데이터 생성 스크립트
+-- review 테이블에 다양한 사용자의 리뷰 데이터를 생성합니다
+
+-- 1. 서울 주요 지역 안전 리뷰 (사용자 ID 1-3)
+INSERT INTO reviews (
+  id, user_id, review_text, location, time_of_day, rating, 
+  selected_keywords, recommended_keywords, score_result, 
+  context_analysis, analysis_method
+) VALUES 
+-- 강남구 역삼동 - 안전한 지역
+(
+
+  gen_random_uuid()::text,
+  2,
+  '역삼역 근처인데 사람도 많고 가로등도 잘 되어있어서 밤에도 안전해요. CCTV도 많이 보이고 경찰서도 가까워서 마음이 놓여요.',
+  '강남구 역삼동',
+  '밤',
+  5,
+  '[{"category": "자연적 감시", "keyword": "밝음"}, {"category": "자연적 감시", "keyword": "CCTV많음"}, {"category": "활동 활성화", "keyword": "사람많음"}, {"category": "감정형", "keyword": "안심"}]'::jsonb,
+  '[{"category": "자연적 감시", "keyword": "가로등", "confidence": 0.9, "reason": "가로등도 잘 되어있어서"}, {"category": "자연적 감시", "keyword": "CCTV", "confidence": 0.8, "reason": "CCTV도 많이 보이고"}]'::jsonb,
+  '{"totalScore": 85, "safetyLevel": "안전", "categoryScores": {"naturalSurveillance": 35, "activitySupport": 25, "emotional": 25}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "매우 안전하고 안심되는 분위기", "situationSummary": "밤시간 대중교통 이용 시 안전한 환경"}'::jsonb,
+  'restricted',
+),
+
+-- 홍대 - 복잡하지만 활기찬 지역
+(
+  gen_random_uuid()::text,
+  3,
+  '홍대 근처는 사람이 너무 많고 복잡해서 약간 불안하긴 하지만 그래도 밝고 활기차서 나쁘지 않아요.',
+  '마포구 홍대동',
+  '저녁',
+  3,
+  '[{"category": "활동 활성화", "keyword": "사람많음"}, {"category": "자연적 접근 통제", "keyword": "복잡"}, {"category": "자연적 감시", "keyword": "밝음"}, {"category": "감정형", "keyword": "약간불안"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "상업지역", "confidence": 0.8, "reason": "홍대 상업지역 특성"}]'::jsonb,
+  '{"totalScore": 15, "safetyLevel": "보통", "categoryScores": {"activitySupport": 20, "accessControl": -10, "naturalSurveillance": 15, "emotional": -10}, "recommendations": ["접근 통제 시설 보완이 필요합니다."]}'::jsonb,
+  '{"emotionalSummary": "복잡하지만 활기찬 분위기", "situationSummary": "저녁시간 상업지역의 혼잡함"}'::jsonb,
+  'restricted',
+),
+
+-- 관악구 낙성대동 - 주거지역
+(
+  gen_random_uuid()::text,
+  4,
+  '대학가 근처 주택가인데 조용하고 좋긴 한데 가로등이 좀 부족한 것 같아요. 밤에는 좀 어두워서 무서울 때가 있어요.',
+  '관악구 낙성대동',
+  '밤',
+  2,
+  '[{"category": "자연적 감시", "keyword": "어두움"}, {"category": "환경 정비", "keyword": "조용함"}, {"category": "감정형", "keyword": "불안"}]'::jsonb,
+  '[{"category": "자연적 감시", "keyword": "가로등부족", "confidence": 0.85, "reason": "가로등이 좀 부족한"}]'::jsonb,
+  '{"totalScore": -20, "safetyLevel": "주의", "categoryScores": {"naturalSurveillance": -25, "maintenance": 5, "emotional": -15}, "recommendations": ["조명 개선이 필요합니다."]}'::jsonb,
+  '{"emotionalSummary": "조용하지만 어두워서 불안", "situationSummary": "밤시간 주거지역의 조명 부족"}'::jsonb,
+  'restricted',
+),
+
+-- 종로구 명동 - 관광지역
+(
+  gen_random_uuid()::text,
+  5,
+  '명동은 관광객이 많아서 항상 북적이고 경찰도 자주 순찰 돌아서 안전한 편이에요.',
+  '중구 명동',
+  '오후',
+  4,
+  '[{"category": "활동 활성화", "keyword": "사람많음"}, {"category": "영역성", "keyword": "순찰"}, {"category": "감정형", "keyword": "안심"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "관광지", "confidence": 0.9, "reason": "명동 관광지 특성"}]'::jsonb,
+  '{"totalScore": 70, "safetyLevel": "안전", "categoryScores": {"activitySupport": 30, "territoriality": 20, "emotional": 20}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "북적이지만 안전한 관광지", "situationSummary": "오후시간 관광지의 활발한 활동"}'::jsonb,
+  'restricted',
+),
+
+-- 성북구 성신여대입구 - 대학가
+(
+  gen_random_uuid()::text,
+  6,
+  '대학교 근처라서 젊은 사람들이 많고 카페도 많아서 분위기가 좋아요. 하지만 새벽에는 좀 조용해져서 혼자 다니기엔 약간 무서워요.',
+  '성북구 성신여대입구',
+  '새벽',
+  3,
+  '[{"category": "활동 활성화", "keyword": "대학가"}, {"category": "환경 정비", "keyword": "조용함"}, {"category": "감정형", "keyword": "약간불안"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "카페많음", "confidence": 0.7, "reason": "카페도 많아서"}]'::jsonb,
+  '{"totalScore": 10, "safetyLevel": "보통", "categoryScores": {"activitySupport": 15, "maintenance": 5, "emotional": -10}, "recommendations": ["활동 활성화 방안이 필요합니다."]}'::jsonb,
+  '{"emotionalSummary": "낮에는 활기차지만 새벽에는 조용", "situationSummary": "새벽시간 대학가의 한적함"}'::jsonb,
+  'restricted',
+),
+
+-- 강서구 화곡동 - 주거지역 (부정적)
+(
+  gen_random_uuid()::text,
+  7,
+  '주택가인데 길이 좁고 가로등도 몇 개 없어서 밤에는 정말 무서워요. 사람도 없고 골목도 많아서 혼자 다니기 힘들어요.',
+  '강서구 화곡동',
+  '밤',
+  1,
+  '[{"category": "자연적 감시", "keyword": "어두움"}, {"category": "자연적 접근 통제", "keyword": "골목많음"}, {"category": "활동 활성화", "keyword": "사람없음"}, {"category": "감정형", "keyword": "매우불안"}]'::jsonb,
+  '[{"category": "자연적 감시", "keyword": "가로등부족", "confidence": 0.9, "reason": "가로등도 몇 개 없어서"}]'::jsonb,
+  '{"totalScore": -60, "safetyLevel": "위험", "categoryScores": {"naturalSurveillance": -30, "accessControl": -15, "activitySupport": -20, "emotional": -25}, "recommendations": ["조명 개선이 필요합니다.", "접근 통제 시설 보완이 필요합니다.", "활동 활성화 방안이 필요합니다."]}'::jsonb,
+  '{"emotionalSummary": "매우 불안하고 위험한 느낌", "situationSummary": "밤시간 주거지역의 심각한 안전 문제"}'::jsonb,
+  'restricted',
+),
+
+-- 서초구 강남역 - 번화가 (긍정적)
+(
+  gen_random_uuid()::text,
+  8,
+  '강남역은 24시간 사람이 많고 상점들도 늦게까지 열어서 안전해요. 지하철역도 바로 있고 택시도 많아서 편해요.',
+  '서초구 강남역',
+  '밤',
+  5,
+  '[{"category": "활동 활성화", "keyword": "사람많음"}, {"category": "활동 활성화", "keyword": "상점많음"}, {"category": "자연적 감시", "keyword": "밝음"}, {"category": "감정형", "keyword": "안심"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "대중교통", "confidence": 0.85, "reason": "지하철역도 바로 있고"}]'::jsonb,
+  '{"totalScore": 90, "safetyLevel": "안전", "categoryScores": {"activitySupport": 40, "naturalSurveillance": 30, "emotional": 20}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "매우 안전하고 편리한 도심", "situationSummary": "밤시간에도 활발한 상업지역"}'::jsonb,
+  'restricted',
+),
+
+-- 키워드만 선택한 리뷰들 (reviewText 없음)
+(
+  gen_random_uuid()::text,
+  9,
+  '',
+  '송파구 잠실동',
+  '오후',
+  4,
+  '[{"category": "자연적 감시", "keyword": "밝음"}, {"category": "활동 활성화", "keyword": "공원있음"}, {"category": "자연적 감시", "keyword": "CCTV많음"}]'::jsonb,
+  '[]'::jsonb,
+  '{"totalScore": 55, "safetyLevel": "안전", "categoryScores": {"naturalSurveillance": 30, "activitySupport": 25}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"keywordSelectionMethod": "manual_only"}'::jsonb,
+  'restricted',
+),
+
+(
+  gen_random_uuid()::text,
+  10,
+  '',
+  '영등포구 여의도동',
+  '저녁',
+  3,
+  '[{"category": "자연적 감시", "keyword": "CCTV많음"}, {"category": "활동 활성화", "keyword": "사람많음"}, {"category": "환경 정비", "keyword": "깨끗함"}]'::jsonb,
+  '[]'::jsonb,
+  '{"totalScore": 45, "safetyLevel": "보통", "categoryScores": {"naturalSurveillance": 20, "activitySupport": 15, "maintenance": 10}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"keywordSelectionMethod": "manual_only"}'::jsonb,
+  'restricted',
+),
+
+-- 제한적 분석 방식 리뷰들
+(
+  gen_random_uuid()::text,
+  2,
+  '지하철역 근처인데 출구가 많고 사람도 많아서 안전해 보여요. 하지만 골목으로 들어가면 좀 어두워져요.',
+  '용산구 이태원동',
+  '저녁',
+  3,
+  '[{"category": "자연적 접근 통제", "keyword": "출구많음"}, {"category": "활동 활성화", "keyword": "사람많음"}, {"category": "자연적 감시", "keyword": "어두움"}]'::jsonb,
+  '[{"category": "자연적 감시", "keyword": "어두운골목", "confidence": 0.8, "reason": "골목으로 들어가면 좀 어두워져요"}, {"category": "활동 활성화", "keyword": "지하철역", "confidence": 0.9, "reason": "지하철역 근처"}]'::jsonb,
+  '{"totalScore": 5, "safetyLevel": "보통", "categoryScores": {"accessControl": 10, "activitySupport": 15, "naturalSurveillance": -20}, "recommendations": ["조명 개선이 필요합니다."]}'::jsonb,
+  '{"locationContext": "이태원 상업지역", "timeContext": "저녁시간 유동인구 많음", "riskAssessment": "골목 지역 조명 부족"}'::jsonb,
+  'restricted',
+),
+
+(
+  gen_random_uuid()::text,
+  3,
+  '새벽에 편의점 가는 길인데 가로등이 고장난 곳이 몇 군데 있어서 무서웠어요.',
+  '노원구 상계동',
+  '새벽',
+  2,
+  '[{"category": "자연적 감시", "keyword": "어두움"}, {"category": "환경 정비", "keyword": "시설고장"}, {"category": "감정형", "keyword": "불안"}]'::jsonb,
+  '[{"category": "자연적 감시", "keyword": "가로등고장", "confidence": 0.9, "reason": "가로등이 고장난 곳이"}]'::jsonb,
+  '{"totalScore": -35, "safetyLevel": "위험", "categoryScores": {"naturalSurveillance": -25, "maintenance": -15, "emotional": -15}, "recommendations": ["조명 개선이 필요합니다.", "환경 정리 및 관리가 필요합니다."]}'::jsonb,
+  '{"emotionalSummary": "어둡고 불안한 분위기", "situationSummary": "새벽시간 시설 고장으로 인한 위험"}'::jsonb,
+  'restricted',
+),
+
+(
+  gen_random_uuid()::text,
+  4,
+  '공원이 있어서 운동하는 사람들도 많고 벤치도 많아서 쉬기 좋아요. CCTV도 보이고 관리가 잘 되어있는 것 같아요.',
+  '송파구 석촌동',
+  '오후',
+  4,
+  '[{"category": "활동 활성화", "keyword": "공원있음"}, {"category": "자연적 감시", "keyword": "CCTV많음"}, {"category": "환경 정비", "keyword": "깨끗함"}, {"category": "감정형", "keyword": "안심"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "운동시설", "confidence": 0.8, "reason": "운동하는 사람들도 많고"}]'::jsonb,
+  '{"totalScore": 75, "safetyLevel": "안전", "categoryScores": {"activitySupport": 30, "naturalSurveillance": 25, "maintenance": 20}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "활기차고 잘 관리된 공원", "situationSummary": "오후시간 공원의 활발한 이용"}'::jsonb,
+  'restricted',
+),
+
+
+(
+  gen_random_uuid()::text,
+  5,
+  '아침 출근길인데 사람들이 많이 다녀서 안전하고 좋아요.',
+  '구로구 구로동',
+  '아침',
+  4,
+  '[{"category": "활동 활성화", "keyword": "사람많음"}, {"category": "감정형", "keyword": "안심"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "출근길", "confidence": 0.8, "reason": "아침 출근길"}]'::jsonb,
+  '{"totalScore": 40, "safetyLevel": "보통", "categoryScores": {"activitySupport": 25, "emotional": 15}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "활기찬 출근길", "situationSummary": "아침시간 통근로의 안전함"}'::jsonb,
+  'restricted',
+),
+
+(
+  gen_random_uuid()::text,
+  6,
+  '점심시간이라 직장인들이 많아서 안전하고 식당가라서 밝고 활기차요.',
+  '종로구 종로3가',
+  '점심',
+  5,
+  '[{"category": "활동 활성화", "keyword": "사람많음"}, {"category": "자연적 감시", "keyword": "밝음"}, {"category": "활동 활성화", "keyword": "상점많음"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "식당가", "confidence": 0.85, "reason": "식당가라서"}]'::jsonb,
+  '{"totalScore": 80, "safetyLevel": "안전", "categoryScores": {"activitySupport": 35, "naturalSurveillance": 25, "emotional": 20}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "활기차고 안전한 상업지역", "situationSummary": "점심시간 식당가의 활발한 활동"}'::jsonb,
+  'restricted',
+),
+
+-- 최근 리뷰들 (더 다양한 지역)
+(
+  gen_random_uuid()::text,
+  7,
+  '',
+  '동대문구 청량리동',
+  '오후',
+  3,
+  '[{"category": "자연적 감시", "keyword": "밝음"}, {"category": "환경 정비", "keyword": "보통"}]'::jsonb,
+  '[]'::jsonb,
+  '{"totalScore": 25, "safetyLevel": "보통", "categoryScores": {"naturalSurveillance": 15, "maintenance": 10}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"keywordSelectionMethod": "manual_only"}'::jsonb,
+  'restricted',
+),
+
+(
+  gen_random_uuid()::text,
+  8,
+  '지하상가가 있어서 비 올 때도 좋고 사람도 많아서 안전해요.',
+  '중구 을지로',
+  '저녁',
+  4,
+  '[{"category": "활동 활성화", "keyword": "사람많음"}, {"category": "자연적 접근 통제", "keyword": "지하상가"}, {"category": "감정형", "keyword": "안심"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "지하상가", "confidence": 0.8, "reason": "지하상가가 있어서"}]'::jsonb,
+  '{"totalScore": 50, "safetyLevel": "안전", "categoryScores": {"activitySupport": 25, "accessControl": 15, "emotional": 10}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "편리하고 안전한 상업지역", "situationSummary": "저녁시간 지하상가 주변의 활발한 활동"}'::jsonb,
+  'restricted',
+),
+
+(
+  gen_random_uuid()::text,
+  9,
+  '버스정류장 근처인데 조명도 밝고 사람들도 계속 지나다녀서 나쁘지 않아요.',
+  '광진구 건대입구',
+  '저녁',
+  4,
+  '[{"category": "자연적 감시", "keyword": "밝음"}, {"category": "활동 활성화", "keyword": "대중교통"}, {"category": "활동 활성화", "keyword": "사람많음"}]'::jsonb,
+  '[{"category": "활동 활성화", "keyword": "버스정류장", "confidence": 0.75, "reason": "버스정류장 근처"}]'::jsonb,
+  '{"totalScore": 60, "safetyLevel": "안전", "categoryScores": {"naturalSurveillance": 20, "activitySupport": 30, "emotional": 10}, "recommendations": ["현재 안전 상태가 양호합니다."]}'::jsonb,
+  '{"emotionalSummary": "대중교통 이용이 편리하고 안전", "situationSummary": "저녁시간 대중교통 중심지의 안전함"}'::jsonb,
+  'restricted',
+);
+
+-- 추가 통계용 데이터 (다른 사용자 ID들)
+INSERT INTO reviews (
+  id, user_id, review_text, location, time_of_day, rating, 
+  selected_keywords, score_result, analysis_method
+) VALUES 
+(gen_random_uuid()::text, 4, '편의점이 24시간이라 안전해요', '강남구 신사동', '밤', 4, '[{"category": "활동 활성화", "keyword": "편의점"}]'::jsonb, '{"totalScore": 30, "safetyLevel": "보통"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 5, '공원이 잘 관리되어있어요', '서초구 반포동', '오후', 5, '[{"category": "환경 정비", "keyword": "깨끗함"}]'::jsonb, '{"totalScore": 40, "safetyLevel": "보통"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 6, '골목이 복잡해서 길을 잃을 뻔했어요', '마포구 합정동', '저녁', 2, '[{"category": "자연적 접근 통제", "keyword": "복잡"}]'::jsonb, '{"totalScore": -15, "safetyLevel": "주의"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 7, '경찰서가 근처에 있어서 안심돼요', '성동구 성수동', '밤', 4, '[{"category": "영역성", "keyword": "경찰서근처"}]'::jsonb, '{"totalScore": 50, "safetyLevel": "안전"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 8, '가로등이 고장나서 어두워요', '은평구 연신내', '밤', 1, '[{"category": "자연적 감시", "keyword": "어두움"}]'::jsonb, '{"totalScore": -30, "safetyLevel": "위험"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 9, 'CCTV가 많아서 안전해 보여요', '관악구 봉천동', '오후', 4, '[{"category": "자연적 감시", "keyword": "CCTV많음"}]'::jsonb, '{"totalScore": 35, "safetyLevel": "보통"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 10, '쓰레기가 많아서 지저분해요', '동작구 사당동', '저녁', 2, '[{"category": "환경 정비", "keyword": "더러움"}]'::jsonb, '{"totalScore": -20, "safetyLevel": "주의"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 2, '주차장이 어두워서 무서워요', '서대문구 신촌동', '밤', 2, '[{"category": "자연적 감시", "keyword": "어두움"}]'::jsonb, '{"totalScore": -25, "safetyLevel": "주의"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 3, '상점가라서 밝고 안전해요', '양천구 목동', '저녁', 5, '[{"category": "자연적 감시", "keyword": "밝음"}]'::jsonb, '{"totalScore": 40, "safetyLevel": "보통"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 11, '대학교 근처라서 젊은 사람들이 많아요', '동대문구 회기동', '오후', 4, '[{"category": "활동 활성화", "keyword": "사람많음"}]'::jsonb, '{"totalScore": 35, "safetyLevel": "보통"}'::jsonb, 'restricted'),
+(gen_random_uuid()::text, 12, '지하철역 바로 앞이라서 편해요', '금천구 가산동', '아침', 4, '[{"category": "활동 활성화", "keyword": "대중교통"}]'::jsonb, '{"totalScore": 30, "safetyLevel": "보통"}'::jsonb, 'restricted'),
