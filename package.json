@@ -9,7 +9,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "test": "jest",
     "lint": "eslint src/ --ext .ts",
-    "lint:fix": "eslint src/ --ext .ts --fix"
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "mock": "source .env && PGPASSWORD=$DB_PASSWORD psql -h localhost -U $DB_USER -d $DB_NAME -f scripts/create-mock-users.sql && PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f scripts/create-mock-reviews.sql"
   },
   "keywords": [
     "nodejs",
