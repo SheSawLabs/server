@@ -24,6 +24,7 @@ export interface Review {
   updated_at?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  nickname?: string;  // 추가: 사용자 닉네임
 }
 
 export interface AnalysisResult {

@@ -45,7 +45,12 @@ export class ReviewService {
   
   // 리뷰 조회 (ID로)
   static async getReviewById(id: string): Promise<Review | null> {
-    const query = 'SELECT * FROM reviews WHERE id = $1';
+    const query = `
+      SELECT r.*, u.nickname as user_nickname 
+      FROM reviews r
+      LEFT JOIN users u ON r.user_id = u.id
+      WHERE r.id = $1
+    `;
     
     try {
       const result = await pool.query(query, [id]);
@@ -77,27 +82,27 @@ export class ReviewService {
     
     // cursor 조건 (created_at 기준으로 이후 데이터만)
     if (cursor) {
-      whereConditions.push(`created_at < $${paramIndex}`);
+      whereConditions.push(`r.created_at < $${paramIndex}`);
       queryParams.push(new Date(cursor));
       paramIndex++;
     }
     
     // 필터 조건들
     if (filters?.location) {
-      whereConditions.push(`location ILIKE $${paramIndex}`);
+      whereConditions.push(`r.location ILIKE $${paramIndex}`);
       queryParams.push(`%${filters.location}%`);
       paramIndex++;
     }
     
     if (filters?.analysisMethod) {
-      whereConditions.push(`analysis_method = $${paramIndex}`);
+      whereConditions.push(`r.analysis_method = $${paramIndex}`);
       queryParams.push(filters.analysisMethod);
       paramIndex++;
     }
     
     // 안전도 레벨 필터링 (JSON 필드에서)
     if (filters?.safetyLevel) {
-      whereConditions.push(`score_result->>'safetyLevel' = $${paramIndex}`);
+      whereConditions.push(`r.score_result->>'safetyLevel' = $${paramIndex}`);
       queryParams.push(filters.safetyLevel);
       paramIndex++;
     }
@@ -106,9 +111,11 @@ export class ReviewService {
     
     // 데이터 조회 (limit + 1개를 가져와서 hasMore 판단)
     const dataQuery = `
-      SELECT * FROM reviews 
+      SELECT r.*, u.nickname as user_nickname 
+      FROM reviews r
+      LEFT JOIN users u ON r.user_id = u.id
       ${whereClause}
-      ORDER BY created_at DESC 
+      ORDER BY r.created_at DESC 
       LIMIT $${paramIndex}
     `;
     
@@ -450,7 +457,8 @@ export class ReviewService {
       contextAnalysis: row.context_analysis || {},
       analysisMethod: row.analysis_method,
       createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at)
+      updatedAt: new Date(row.updated_at),
+      nickname: row.user_nickname || null  // 추가: 사용자 닉네임
     };
   }
 }
