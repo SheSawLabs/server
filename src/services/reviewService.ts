@@ -74,6 +74,7 @@ export class ReviewService {
     reviews: Review[]; 
     nextCursor: string | null; 
     hasMore: boolean; 
+    topKeywords?: { keyword: string; count: number; percentage: number }[];
   }> {
     
     let whereConditions = [];
@@ -131,11 +132,18 @@ export class ReviewService {
       const nextCursor = hasMore && reviews.length > 0 && reviews[reviews.length - 1].createdAt
         ? reviews[reviews.length - 1].createdAt!.toISOString()
         : null;
+
+      // location 필터가 있는 경우 topKeywords 계산
+      let topKeywords: { keyword: string; count: number; percentage: number }[] | undefined;
+      if (filters?.location) {
+        topKeywords = await this.calculateTopKeywords(filters.location);
+      }
       
       return {
         reviews,
         nextCursor,
-        hasMore
+        hasMore,
+        topKeywords
       };
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -344,26 +352,9 @@ export class ReviewService {
         ? Math.round((ratings.reduce((sum, r) => sum + r, 0) / ratings.length) * 10) / 10 
         : 0;
 
-      // 키워드 통계 계산
-      const keywordCounts: { [key: string]: number } = {};
-      reviewResult.rows.forEach(row => {
-        const selectedKeywords = row.selected_keywords || [];
-        selectedKeywords.forEach((item: any) => {
-          if (item.keyword) {
-            keywordCounts[item.keyword] = (keywordCounts[item.keyword] || 0) + 1;
-          }
-        });
-      });
-
-      // 상위 키워드 3개 선택
-      const topKeywords = Object.entries(keywordCounts)
-        .map(([keyword, count]) => ({
-          keyword,
-          count,
-          percentage: Math.round((count / totalReviews) * 100)
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 3);
+      // 키워드 통계 계산 (통합된 함수 사용)
+      const keywordCounts = this.calculateKeywordCounts(reviewResult.rows);
+      const topKeywords = this.getTopKeywordsFromCounts(keywordCounts, totalReviews);
 
       return {
         location,
@@ -442,6 +433,65 @@ export class ReviewService {
     }
   }
   
+  // 상위 키워드 계산 (location은 optional)
+  private static async calculateTopKeywords(location?: string): Promise<{ keyword: string; count: number; percentage: number }[]> {
+    try {
+      // 리뷰들 조회 (location이 있으면 필터링, 없으면 전체)
+      let reviewQuery = `SELECT selected_keywords FROM reviews`;
+      const queryParams: any[] = [];
+      
+      if (location) {
+        reviewQuery += ` WHERE location ILIKE $1`;
+        queryParams.push(`%${location}%`);
+      }
+      
+      const reviewResult = await pool.query(reviewQuery, queryParams);
+      
+      const totalReviews = reviewResult.rows.length;
+      if (totalReviews === 0) {
+        return [];
+      }
+
+      // keywordCounts 계산
+      const keywordCounts = this.calculateKeywordCounts(reviewResult.rows);
+
+      // 상위 키워드 3개 선택
+      return this.getTopKeywordsFromCounts(keywordCounts, totalReviews);
+    } catch (error) {
+      console.error('Error calculating top keywords:', error);
+      return [];
+    }
+  }
+
+  // keywordCounts 계산 로직 분리
+  private static calculateKeywordCounts(rows: any[]): { [key: string]: number } {
+    const keywordCounts: { [key: string]: number } = {};
+    rows.forEach(row => {
+      const selectedKeywords = row.selected_keywords || [];
+      selectedKeywords.forEach((item: any) => {
+        if (item.keyword) {
+          keywordCounts[item.keyword] = (keywordCounts[item.keyword] || 0) + 1;
+        }
+      });
+    });
+    return keywordCounts;
+  }
+
+  // keywordCounts에서 topKeywords 추출
+  private static getTopKeywordsFromCounts(
+    keywordCounts: { [key: string]: number }, 
+    totalReviews: number
+  ): { keyword: string; count: number; percentage: number }[] {
+    return Object.entries(keywordCounts)
+      .map(([keyword, count]) => ({
+        keyword,
+        count,
+        percentage: Math.round((count / totalReviews) * 100)
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+  }
+
   // DB 행을 Review 객체로 매핑
   private static mapDbRowToReview(row: any): Review {
     return {
